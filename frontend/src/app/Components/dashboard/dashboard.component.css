@@ -1,0 +1,250 @@
+/* Dashboard Component - Angular Material & Bootstrap Modern Styles */
+
+.dashboard-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: relative;
+  padding-bottom: 2rem;
+}
+
+.dashboard-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* Menu overlay z-index para asegurar que aparezca sobre otros elementos */
+.cdk-overlay-container {
+  z-index: 2000 !important;
+}
+
+.cdk-overlay-pane {
+  z-index: 2000 !important;
+}
+
+/* Material Menu styles para mejorar apariencia */
+.mat-mdc-menu-panel {
+  z-index: 2000 !important;
+}
+
+/* Menu items styling para alinear íconos */
+.mat-mdc-menu-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.mat-mdc-menu-item mat-icon {
+  margin-right: 0 !important;
+  font-size: 20px !important;
+  width: 20px !important;
+  height: 20px !important;
+}
+
+/* Font Awesome icons en menú para consistencia visual */
+.mat-mdc-menu-item i.fas {
+  margin-right: 0 !important;
+  font-size: 16px !important;
+  width: 20px !important;
+  height: 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: rgba(0, 0, 0, 0.54);
+}
+
+
+/* Table Container - Necesario para Material Table */
+.table-container {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  background: white;
+}
+
+.table-container.loading {
+  min-height: 400px;
+}
+
+.usuarios-table {
+  width: 100%;
+  background: transparent;
+}
+
+.usuarios-table mat-header-cell {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #667eea;
+}
+
+.usuarios-table mat-cell,
+.usuarios-table mat-header-cell {
+  padding: 16px 12px;
+}
+
+.usuario-row:hover {
+  background-color: rgba(102, 126, 234, 0.05);
+}
+
+/* User Cell - Para alineación en tabla */
+.user-cell {
+  display: flex;
+  align-items: center;
+}
+
+.user-avatar {
+  margin-right: 8px;
+  color: #667eea;
+}
+
+/* Chips de estado - Importante para diferenciar visualmente estados */
+.status-chip-1 {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+}
+
+.status-chip-0 {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.sexo-chip-0 {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+.sexo-chip-1 {
+  background-color: #fce4ec;
+  color: #ad1457;
+}
+
+/* Actions cell - Para botones en tabla */
+.actions-cell {
+  display: flex;
+  gap: 8px;
+}
+
+/* Loading Overlay - Necesario para feedback visual */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+/* No Results - Importante para feedback cuando no hay datos */
+.no-results {
+  text-align: center;
+  padding: 64px 32px;
+  color: #666;
+}
+
+.no-results-icon {
+  font-size: 4rem;
+  color: #ddd;
+  margin-bottom: 16px;
+}
+
+/* Paginator */
+mat-paginator {
+  background: transparent;
+  border-top: 1px solid #eee;
+}
+
+/* Responsive para tabla Material */
+@media (max-width: 768px) {
+  .table-container {
+    overflow-x: auto;
+  }
+  
+  .usuarios-table {
+    min-width: 600px;
+  }
+}
+
+/* Material Design enhancements - Mejoras visuales necesarias */
+mat-form-field {
+  border-radius: 8px;
+}
+
+/* Custom scrollbar - Mejora la usabilidad en tablas horizontales */
+.table-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Mejoras para menús dropdown */
+.dropdown-item {
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.dropdown-item:hover {
+  background-color: #f8f9fa;
+  transform: translateX(5px);
+}
+
+.dropdown-item.text-danger:hover {
+  background-color: #f8d7da;
+  color: #721c24 !important;
+}
+
+/* Animaciones para transiciones suaves */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 100%, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Mejoras de accesibilidad */
+.btn:focus,
+.dropdown-item:focus,
+.nav-link:focus {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+/* Modo de impresión */
+@media print {
+  .navbar {
+    display: none;
+  }
+  
+  .dashboard-container {
+    background: white;
+  }
+}

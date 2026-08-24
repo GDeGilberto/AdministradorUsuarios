@@ -1,0 +1,88 @@
+# ==============================================================================
+# OS / System Files
+# ==============================================================================
+Thumbs.db
+Desktop.ini
+.DS_Store
+$RECYCLE.BIN/
+
+# ==============================================================================
+# IDEs and Editors
+# ==============================================================================
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# VS Code
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# JetBrains (Rider, WebStorm, etc.)
+.idea/
+*.iws
+*.csproj.user
+
+# ==============================================================================
+# Environments and Secrets
+# ==============================================================================
+.env
+.env.local
+.env.*.local
+!.env.example
+docker-compose.override.yml
+
+# ==============================================================================
+# Frontend (Angular / Node)
+# ==============================================================================
+frontend/node_modules/
+frontend/dist/
+frontend/tmp/
+frontend/out-tsc/
+frontend/.angular/
+frontend/.sass-cache/
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+
+# ==============================================================================
+# Backend (.NET / C#)
+# ==============================================================================
+# Build results
+[Dd]ebug/
+[Dd]ebugPS/
+[Rr]elease/
+[Rr]eleasePS/
+x64/
+x86/
+[Aa]rm/
+[Aa]rm64/
+binstmp/
+bin/
+obj/
+
+# Roslyn cache directories
+.vs-msbuild-state/
+
+# Test results
+TestResults/
+*.trx
+
+# dotnet tools / packages / user secrets
+.metadata/
+.dotnet/
+usersecrets/
+appsettings.Development.json
+
+# ==============================================================================
+# Miscellaneous
+# ==============================================================================
+# ATL / Skill Registry / Agents
+.atl/
+.agents/

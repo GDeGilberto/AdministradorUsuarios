@@ -1,0 +1,218 @@
+<!-- Register Page - Semantic HTML -->
+<main class="login-main" role="main">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-6 col-lg-4">
+        <article class="login-card card shadow-lg border-0" role="region" aria-labelledby="register-title">
+          <div class="card-body p-5">
+            <!-- Header Section -->
+            <header class="login-header text-center mb-4">
+              <i class="fas fa-user-plus fa-3x text-primary mb-3" aria-hidden="true"></i>
+              <h1 id="register-title" class="card-title text-dark h2">Crear Cuenta</h1>
+              <p class="text-muted">Regístrate para acceder</p>
+            </header>
+
+            <!-- Register Form -->
+            <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" novalidate>
+
+              <!-- Email Field -->
+              <div class="mb-3">
+                <label for="email" class="form-label">
+                  <i class="fas fa-envelope me-2" aria-hidden="true"></i>
+                  <span>Email</span>
+                </label>
+                <input 
+                  type="email" 
+                  id="email"
+                  formControlName="email"
+                  class="form-control form-control-lg"
+                  [class.is-invalid]="registerForm.get('email')?.touched && registerForm.get('email')?.errors"
+                  placeholder="usuario@ejemplo.com"
+                  autocomplete="email"
+                />
+                <div 
+                  *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.errors" 
+                  class="invalid-feedback"
+                  role="alert">
+                  <div *ngIf="registerForm.get('email')?.errors?.['required']">
+                    El email es requerido
+                  </div>
+                  <div *ngIf="registerForm.get('email')?.errors?.['email']">
+                    Ingresa un email válido
+                  </div>
+                </div>
+              </div>
+
+              <!-- Usuario Field -->
+              <div class="mb-3">
+                <label for="nombreUsuario" class="form-label">
+                  <i class="fas fa-user me-2" aria-hidden="true"></i>
+                  <span>Usuario</span>
+                </label>
+                <input 
+                  type="text" 
+                  id="nombreUsuario"
+                  formControlName="nombreUsuario"
+                  class="form-control form-control-lg"
+                  [class.is-invalid]="registerForm.get('nombreUsuario')?.touched && registerForm.get('nombreUsuario')?.errors"
+                  placeholder="Mínimo 7 caracteres alfanuméricos"
+                  autocomplete="username"
+                />
+                <div 
+                  *ngIf="registerForm.get('nombreUsuario')?.touched && registerForm.get('nombreUsuario')?.errors" 
+                  class="invalid-feedback"
+                  role="alert">
+                  <div *ngIf="registerForm.get('nombreUsuario')?.errors?.['required']">
+                    El usuario es requerido
+                  </div>
+                  <div *ngIf="registerForm.get('nombreUsuario')?.errors?.['minlength']">
+                    Debe tener al menos 7 caracteres
+                  </div>
+                  <div *ngIf="registerForm.get('nombreUsuario')?.errors?.['alphanumeric']">
+                    Solo caracteres alfanuméricos
+                  </div>
+                </div>
+              </div>
+
+              <!-- Contraseña Field -->
+              <div class="mb-3">
+                <label for="contraseña" class="form-label">
+                  <i class="fas fa-lock me-2" aria-hidden="true"></i>
+                  <span>Contraseña</span>
+                </label>
+                <input 
+                  type="password" 
+                  id="contraseña"
+                  formControlName="contraseña"
+                  class="form-control form-control-lg"
+                  [class.is-invalid]="registerForm.get('contraseña')?.touched && registerForm.get('contraseña')?.errors"
+                  placeholder="Mínimo 10 caracteres"
+                  autocomplete="new-password"
+                />
+                <div 
+                  *ngIf="registerForm.get('contraseña')?.touched && registerForm.get('contraseña')?.errors" 
+                  class="invalid-feedback d-block"
+                  role="alert">
+                  <div *ngIf="registerForm.get('contraseña')?.errors?.['required']">
+                    La contraseña es requerida
+                  </div>
+                  <div *ngIf="registerForm.get('contraseña')?.errors?.['minlength']">
+                    Debe tener al menos 10 caracteres
+                  </div>
+                  <div *ngIf="registerForm.get('contraseña')?.errors?.['passwordStrength']">
+                    <small>Debe contener: mayúscula, minúscula, número y símbolo</small>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Confirmar Contraseña Field -->
+              <div class="mb-3">
+                <label for="confirmarContraseña" class="form-label">
+                  <i class="fas fa-lock me-2" aria-hidden="true"></i>
+                  <span>Confirmar Contraseña</span>
+                </label>
+                <input 
+                  type="password" 
+                  id="confirmarContraseña"
+                  formControlName="confirmarContraseña"
+                  class="form-control form-control-lg"
+                  [class.is-invalid]="registerForm.get('confirmarContraseña')?.touched && (registerForm.get('confirmarContraseña')?.errors || registerForm.hasError('passwordMismatch'))"
+                  placeholder="Repite tu contraseña"
+                  autocomplete="new-password"
+                />
+                <div 
+                  *ngIf="registerForm.get('confirmarContraseña')?.touched && (registerForm.get('confirmarContraseña')?.errors || registerForm.hasError('passwordMismatch'))" 
+                  class="invalid-feedback d-block"
+                  role="alert">
+                  <div *ngIf="registerForm.get('confirmarContraseña')?.errors?.['required']">
+                    La confirmación es requerida
+                  </div>
+                  <div *ngIf="registerForm.hasError('passwordMismatch')">
+                    Las contraseñas no coinciden
+                  </div>
+                </div>
+              </div>
+
+              <!-- Sexo Field -->
+              <div class="mb-4">
+                <label class="form-label">
+                  <i class="fas fa-venus-mars me-2" aria-hidden="true"></i>
+                  <span>Sexo</span>
+                </label>
+                <div class="d-flex gap-4">
+                  <div class="form-check" *ngFor="let option of sexoOptions">
+                    <input 
+                      type="radio"
+                      [id]="'sexo-' + option.value"
+                      formControlName="sexo"
+                      [value]="option.value"
+                      class="form-check-input"
+                    />
+                    <label [for]="'sexo-' + option.value" class="form-check-label">
+                      {{ option.label }}
+                    </label>
+                  </div>
+                </div>
+                <div *ngIf="registerForm.get('sexo')?.touched && registerForm.get('sexo')?.errors" class="invalid-feedback d-block">
+                  <div *ngIf="registerForm.get('sexo')?.errors?.['required']">
+                    Debes seleccionar el sexo
+                  </div>
+                </div>
+              </div>
+
+              <!-- Alert Messages -->
+              <section class="alerts-section" aria-live="polite">
+                <!-- Error Message -->
+                <div 
+                  *ngIf="errorMessage" 
+                  class="alert alert-danger d-flex align-items-center" 
+                  role="alert">
+                  <i class="fas fa-exclamation-triangle me-2" aria-hidden="true"></i>
+                  <div>{{ errorMessage }}</div>
+                </div>
+
+                <!-- Success Message -->
+                <div 
+                  *ngIf="successMessage" 
+                  class="alert alert-success d-flex align-items-center" 
+                  role="alert">
+                  <i class="fas fa-check-circle me-2" aria-hidden="true"></i>
+                  <div>{{ successMessage }}</div>
+                </div>
+              </section>
+
+              <!-- Submit Button -->
+              <div class="d-grid">
+                <button 
+                  type="submit"
+                  [disabled]="loading || registerForm.invalid"
+                  class="btn btn-primary btn-lg">
+                  <span 
+                    *ngIf="loading" 
+                    class="spinner-border spinner-border-sm me-2" 
+                    role="status"
+                    aria-hidden="true"></span>
+                  <i 
+                    *ngIf="!loading" 
+                    class="fas fa-user-plus me-2" 
+                    aria-hidden="true"></i>
+                  <span>{{ loading ? 'Creando cuenta...' : 'Crear Cuenta' }}</span>
+                </button>
+              </div>
+
+              <!-- Login Link -->
+              <div class="text-center mt-3">
+                <p class="mb-0">
+                  ¿Ya tienes cuenta? 
+                  <a routerLink="/login" class="text-primary text-decoration-none fw-bold">
+                    Inicia sesión aquí
+                  </a>
+                </p>
+              </div>
+            </form>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+</main>

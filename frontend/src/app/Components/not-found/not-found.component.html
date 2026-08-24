@@ -1,0 +1,100 @@
+<!-- 404 Not Found Page - Semantic HTML -->
+<main class="not-found-main" role="main">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-6">
+        <article class="not-found-content text-center" role="region" aria-labelledby="error-title">
+          <!-- Error Icon and Code -->
+          <header class="error-header">
+            <div class="error-icon mb-4" aria-hidden="true">
+              <i class="fas fa-search fa-3x text-primary"></i>
+            </div>
+            <h1 id="error-title" class="error-code display-1 text-primary">404</h1>
+          </header>
+          
+          <!-- Error Message -->
+          <section class="error-message" aria-describedby="error-description">
+            <h2 class="h3 mb-3">¡Oops! Página no encontrada</h2>
+            <p id="error-description" class="text-muted mb-4">
+              La página que estás buscando no existe o ha sido movida.
+              Por favor, verifica la URL o navega usando los botones de abajo.
+            </p>
+          </section>
+
+          <!-- Navigation Actions -->
+          <section class="error-actions" aria-labelledby="actions-title">
+            <h3 id="actions-title" class="sr-only">Acciones de navegación</h3>
+            <div class="action-buttons mb-5">
+              <button 
+                type="button" 
+                class="btn btn-primary btn-lg me-3 mb-2"
+                (click)="goHome()"
+                aria-describedby="home-help">
+                <i class="fas fa-home me-2" aria-hidden="true"></i>
+                Ir al Inicio
+              </button>
+              <small id="home-help" class="sr-only">
+                Te llevará a la página de inicio de sesión
+              </small>
+              
+              <button 
+                type="button" 
+                class="btn btn-outline-secondary btn-lg mb-2"
+                (click)="goBack()"
+                aria-describedby="back-help">
+                <i class="fas fa-arrow-left me-2" aria-hidden="true"></i>
+                Volver Atrás
+              </button>
+              <small id="back-help" class="sr-only">
+                Te llevará a la página anterior
+              </small>
+            </div>
+          </section>
+
+          <!-- Suggestions -->
+          <aside class="error-suggestions" role="complementary" aria-labelledby="suggestions-title">
+            <h2 id="suggestions-title" class="h5 mb-3">¿Qué puedes hacer?</h2>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <article class="suggestion-card h-100">
+                  <div class="suggestion-icon mb-2" aria-hidden="true">
+                    <i class="fas fa-sign-in-alt fa-2x text-primary"></i>
+                  </div>
+                  <h3 class="h6">Iniciar Sesión</h3>
+                  <p class="small text-muted">Accede a tu cuenta personal</p>
+                </article>
+              </div>
+              
+              <div class="col-md-4">
+                <article class="suggestion-card h-100">
+                  <div class="suggestion-icon mb-2" aria-hidden="true">
+                    <i class="fas fa-tachometer-alt fa-2x text-success"></i>
+                  </div>
+                  <h3 class="h6">Dashboard</h3>
+                  <p class="small text-muted">Ve a tu panel principal</p>
+                </article>
+              </div>
+              
+              <div class="col-md-4">
+                <article class="suggestion-card h-100">
+                  <div class="suggestion-icon mb-2" aria-hidden="true">
+                    <i class="fas fa-question-circle fa-2x text-info"></i>
+                  </div>
+                  <h3 class="h6">Ayuda</h3>
+                  <p class="small text-muted">Obtén asistencia técnica</p>
+                </article>
+              </div>
+            </div>
+          </aside>
+
+          <!-- Additional Help -->
+          <footer class="error-footer mt-4">
+            <p class="text-muted small">
+              Si el problema persiste, contacta al administrador del sistema.
+            </p>
+          </footer>
+        </article>
+      </div>
+    </div>
+  </div>
+</main>
