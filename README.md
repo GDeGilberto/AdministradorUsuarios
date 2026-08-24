@@ -1,6 +1,6 @@
-# 👥 Administrador de Empleados
+# 👥 Administrador de Usuarios
 
-Este es un monorepo que unifica el sistema de administración de empleados, compuesto por un backend en **.NET 9.0** y un frontend en **Angular v20**.
+Este es un monorepo que unifica el sistema de administración de usuarios, compuesto por un backend en **.NET 9.0** y un frontend en **Angular v20**.
 
 ---
 
@@ -27,7 +27,7 @@ Si prefieres ejecutar los servicios directamente en tu máquina local:
 1. **Clonar el repositorio:**
    ```bash
    git clone <URL_DEL_REPOSITORIO>
-   cd AdministradorEmpleados
+   cd AdministradorUsuarios
    ```
 
 2. **Configurar las variables de entorno:**
