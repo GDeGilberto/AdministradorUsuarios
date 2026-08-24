@@ -180,7 +180,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1");
-        c.RoutePrefix = string.Empty;
+        // c.RoutePrefix = string.Empty;
         // Display the authorize button at the top of the page
         c.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.None);
         // Make the authorization persist after page refresh
