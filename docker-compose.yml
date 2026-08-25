@@ -1,7 +1,8 @@
 services:
   # 1. Base de datos SQL Server contenida
   database:
-    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: administradorUsuarios-database
+    image: mcr.microsoft.com/azure-sql-edge:latest
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD=${DB_PASSWORD}
@@ -10,6 +11,7 @@ services:
 
   # 2. Tu API de .NET
   backend:
+    container_name: administradorUsuarios-backend
     build: ./backend
     ports:
       - "${BACKEND_PORT}:8080"
@@ -24,6 +26,7 @@ services:
 
   # 3. Tu aplicación Angular
   frontend:
+    container_name: administradorUsuarios-frontend
     build: ./frontend
     ports:
       - "${FRONTEND_PORT}:80"
