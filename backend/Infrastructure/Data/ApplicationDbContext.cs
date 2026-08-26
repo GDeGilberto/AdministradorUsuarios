@@ -1,4 +1,4 @@
-﻿using Infrastructure.Models;
+using Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data
@@ -53,7 +53,7 @@ namespace Infrastructure.Data
 
                 entity.Property(u => u.FechaDeCreacion)
                     .IsRequired()
-                    .HasDefaultValueSql("GETUTCDATE()")
+                    .HasDefaultValueSql("timezone('utc', now())")
                     .ValueGeneratedOnAdd();
 
                 entity.HasIndex(u => u.Email).IsUnique();
