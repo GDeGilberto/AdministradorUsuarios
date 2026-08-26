@@ -119,7 +119,7 @@ if (string.IsNullOrEmpty(connectionString) || connectionString.Contains("YOUR_DA
     var dbName = Environment.GetEnvironmentVariable("DB_NAME") ?? "AdministradorEmpleadosDb";
     var dbUser = Environment.GetEnvironmentVariable("DB_USER") ?? "sa";
     var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
-    var dbPort = Environment.GetEnvironmentVariable("DB_PORT") ?? "1433";
+    var dbPort = Environment.GetEnvironmentVariable("DB_PORT") ?? "5432";
 
     // Si corre de manera local fuera de Docker, "database" debe apuntar a "localhost"
     if (dbServer == "database")
@@ -127,16 +127,11 @@ if (string.IsNullOrEmpty(connectionString) || connectionString.Contains("YOUR_DA
         dbServer = "localhost";
     }
 
-    if (dbServer == "localhost" && dbPort != "1433")
-    {
-        dbServer = $"localhost,{dbPort}";
-    }
-
-    connectionString = $"Server={dbServer};Database={dbName};User Id={dbUser};Password={dbPassword};TrustServerCertificate=True;MultipleActiveResultSets=true;";
+    connectionString = $"Host={dbServer};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPassword};";
 }
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseNpgsql(connectionString));
 
 // Register Repositories
 builder.Services.AddScoped<IRepository<Usuario>, UsuarioRepository>();
@@ -157,19 +152,40 @@ builder.Services.AddScoped<LoginUseCase>();
 
 var app = builder.Build();
 
-// Ensure database is created
+// Ensure database is created with resilience
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILogger<Program>>();
     try
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
-        context.Database.EnsureCreated();
+        int retries = 5;
+
+        while (retries > 0)
+        {
+            try
+            {
+                context.Database.EnsureCreated();
+                break;
+            }
+            catch (Exception ex)
+            {
+                retries--;
+                if (retries == 0)
+                {
+                    logger.LogError(ex, "An error occurred while creating the database after multiple retries.");
+                    throw;
+                }
+                logger.LogWarning("Database not ready yet. Retrying in 5 seconds... ({Retries} retries left)", retries);
+                System.Threading.Thread.Sleep(5000);
+            }
+        }
     }
     catch (Exception ex)
     {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while creating the database.");
+        logger.LogError(ex, "Fatal error: Could not initialize database.");
+        throw;
     }
 }
 
