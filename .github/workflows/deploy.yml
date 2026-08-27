@@ -1,0 +1,39 @@
+# 1. Nombre del workflow que aparecerá en la pestaña "Actions" de GitHub
+name: Deploy to Raspberry Pi (Production)
+
+# 2. El disparador (Trigger): Cuándo debe ejecutarse este workflow
+on:
+  push:
+    branches:
+      - main # Se ejecutará automáticamente solo cuando hagas push o merge a 'main'
+
+# 3. La lista de tareas (Jobs) que queremos que ejecute el pipeline
+jobs:
+  deploy:
+    name: Build and Deploy
+    # ¡CRÍTICO! Le dice a GitHub que use tu Raspberry Pi en lugar de sus servidores en la nube
+    runs-on: self-hosted 
+
+    steps:
+      # Paso A: Descarga los últimos cambios del repositorio en la Raspberry Pi
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Paso B: Toma el contenido de tu secreto de GitHub y crea el archivo .env real
+      - name: Create Production .env File
+        run: |
+          echo "${{ secrets.PROD_ENV_FILE }}" > .env
+
+      # Paso C: Compila las imágenes (ARM64) y levanta los contenedores.
+      # Usar '--build' asegura que si hay cambios de código, se recompile.
+      # Al no usar 'docker compose down' previo, los contenedores viejos siguen corriendo
+      # de fondo mientras se compila, minimizando el downtime a escasos segundos.
+      - name: Deploy with Docker Compose
+        run: |
+          docker compose up -d --build
+
+      # Paso D: Libera espacio en la Raspberry Pi borrando imágenes y cachés huérfanas
+      - name: Docker Clean Up
+        run: |
+          docker image prune -f
+          docker builder prune -f
