@@ -127,7 +127,39 @@ export class AuthService {
       return false;
     }
     const token = localStorage.getItem('token');
-    return !!token;
+    if (!token) {
+      return false;
+    }
+
+    if (this.isTokenExpired(token)) {
+      this.logout();
+      return false;
+    }
+
+    return true;
+  }
+
+  private isTokenExpired(token: string): boolean {
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        return true; // Token inválido o corrupto
+      }
+
+      const payload = parts[1];
+      // Decodificar Base64 de forma segura (soportando URL-safe base64)
+      const decodedPayload = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+      const parsedPayload = JSON.parse(decodedPayload);
+
+      if (!parsedPayload.exp) {
+        return false; // Si no tiene fecha de expiración, asumimos que no expira
+      }
+
+      const expirationDate = parsedPayload.exp * 1000;
+      return Date.now() >= expirationDate;
+    } catch (e) {
+      return true; // Si falla la decodificación, asumimos que está expirado/inválido
+    }
   }
 
   getToken(): string | null {
