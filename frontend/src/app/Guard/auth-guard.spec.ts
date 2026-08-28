@@ -1,17 +1,27 @@
 import { TestBed } from '@angular/core/testing';
-import { CanActivateFn } from '@angular/router';
-
+import { Router } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { authGuard } from './auth-guard';
+import { AuthService } from '../Services/auth';
 
 describe('authGuard', () => {
-  const executeGuard: CanActivateFn = (...guardParameters) => 
-      TestBed.runInInjectionContext(() => authGuard(...guardParameters));
+  let guard: authGuard;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      imports: [RouterTestingModule, HttpClientTestingModule],
+      providers: [
+        authGuard, 
+        AuthService,
+        provideZonelessChangeDetection()
+      ]
+    });
+    guard = TestBed.inject(authGuard);
   });
 
   it('should be created', () => {
-    expect(executeGuard).toBeTruthy();
+    expect(guard).toBeTruthy();
   });
 });
