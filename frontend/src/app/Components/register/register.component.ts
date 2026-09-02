@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -16,6 +16,7 @@ export class RegisterComponent implements OnInit {
   private formBuilder = inject(FormBuilder);
   private usuarioService = inject(UsuarioService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   registerForm!: FormGroup;
   loading = false;
@@ -106,16 +107,29 @@ export class RegisterComponent implements OnInit {
       };
 
       this.usuarioService.createUsuario(registerData)
-        .pipe(finalize(() => this.loading = false))
+        .pipe(finalize(() => {
+          this.loading = false;
+          this.cdr.detectChanges();
+        }))
         .subscribe({
           next: () => {
+            this.loading = false;
             this.successMessage = 'Usuario registrado exitosamente. Redirigiendo al login...';
+            this.cdr.detectChanges();
             setTimeout(() => {
               this.router.navigate(['/login']);
             }, 2000);
           },
           error: (error: any) => {
-            this.errorMessage = error.message || 'Error al registrar usuario. Inténtalo de nuevo.';
+            this.loading = false;
+            if (typeof error === 'string') {
+              this.errorMessage = error;
+            } else if (error?.message && typeof error.message === 'string') {
+              this.errorMessage = error.message;
+            } else {
+              this.errorMessage = 'Error al registrar usuario. Inténtalo de nuevo.';
+            }
+            this.cdr.detectChanges();
           }
         });
     }

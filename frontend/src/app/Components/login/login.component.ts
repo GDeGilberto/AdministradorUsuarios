@@ -66,17 +66,19 @@ export class LoginComponent implements OnInit {
       .pipe(finalize(() => this.loading = false))
       .subscribe({
         next: (response: any) => {
+          this.loading = false;
           this.successMessage = '¡Login exitoso! Redirigiendo...';
           
-          // Redirigir después de mostrar el mensaje
           setTimeout(() => {
             this.router.navigate([this.returnUrl]);
           }, 1500);
         },
         error: (error: any) => {
-          
-          if (error.message) {
+          this.loading = false;
+          if (error && typeof error.message === 'string') {
             this.errorMessage = error.message;
+          } else if (typeof error === 'string') {
+            this.errorMessage = error;
           } else {
             this.errorMessage = 'Error inesperado. Intenta nuevamente.';
           }
