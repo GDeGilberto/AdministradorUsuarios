@@ -1,4 +1,4 @@
-﻿using Application.UseCases;
+using Application.UseCases;
 using Application.DTOs;
 using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
@@ -45,8 +45,19 @@ namespace API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var usuario = await _addUsuarioUseCase.ExecuteAsync(usuarioDTO);
-            return CreatedAtAction(nameof(GetUsuarios), new { id = usuario.Id }, usuario);
+            try
+            {
+                var usuario = await _addUsuarioUseCase.ExecuteAsync(usuarioDTO);
+                return CreatedAtAction(nameof(GetUsuarios), new { id = usuario.Id }, usuario);
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPut("{id}")]
