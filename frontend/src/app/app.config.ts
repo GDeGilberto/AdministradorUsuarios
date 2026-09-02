@@ -3,7 +3,7 @@ import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { importProvidersFrom } from '@angular/core';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { authInterceptorFn } from './Interceptors/auth-interceptor';
+import { authInterceptorFn } from './core/interceptors/auth.interceptor';
 
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';

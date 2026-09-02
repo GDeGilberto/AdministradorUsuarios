@@ -1,10 +1,10 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './Components/login/login.component';
-import { RegisterComponent } from './Components/register/register.component';
-import { DashboardComponent } from './Components/dashboard/dashboard.component';
-import { NotFoundComponent } from './Components/not-found/not-found.component';
-import { authGuard } from './Guard/auth-guard';
-import { NoAuthGuard } from './Guard/no-auth-guard';
+import { LoginComponent } from './features/auth/login/login.component';
+import { RegisterComponent } from './features/auth/register/register.component';
+import { UsuariosPageComponent } from './features/usuarios/page/usuarios-page.component';
+import { NotFoundComponent } from './shared/components/not-found/not-found.component';
+import { authGuard } from './core/guards/auth.guard';
+import { NoAuthGuard } from './core/guards/no-auth.guard';
 
 export const routes: Routes = [
   { 
@@ -18,11 +18,16 @@ export const routes: Routes = [
     canActivate: [NoAuthGuard]
   },
   { 
-    path: 'dashboard', 
-    component: DashboardComponent,
+    path: 'usuarios', 
+    component: UsuariosPageComponent,
     canActivate: [authGuard]
   },
-  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
+  { 
+    path: 'dashboard', 
+    redirectTo: '/usuarios',
+    pathMatch: 'full'
+  },
+  { path: '', redirectTo: '/usuarios', pathMatch: 'full' },
   { path: '404', component: NotFoundComponent },
   { path: '**', redirectTo: '/404' }
 ];

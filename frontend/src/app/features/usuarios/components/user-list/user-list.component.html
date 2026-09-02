@@ -1,0 +1,151 @@
+<div class="card shadow border-0">
+  <div class="card-header bg-light py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div class="d-flex align-items-center">
+      <mat-icon class="text-primary me-2">people</mat-icon>
+      <h2 class="h5 card-title fw-bold mb-0 text-dark">Lista de Usuarios</h2>
+    </div>
+
+    <!-- Botón para Agregar Nuevo Usuario -->
+    <button type="button" class="btn btn-success text-white btn-sm d-flex align-items-center" (click)="onCreate()">
+      <mat-icon class="me-1 fs-6">add</mat-icon>
+      <span>Nuevo Usuario</span>
+    </button>
+  </div>
+
+  <div class="card-body">
+    <!-- Filtros -->
+    <form class="row g-3 mb-4">
+      <div class="col-12 col-md-5 mb-3 mb-md-0">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Buscar usuario...</mat-label>
+          <input 
+            matInput 
+            [(ngModel)]="filtroTexto" 
+            (input)="onFiltroTextoChange()"
+            name="filtroTexto">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <div class="col-8 col-md-4 mb-3 mb-md-0">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Filtrar por estatus</mat-label>
+          <mat-select [(value)]="filtroEstatus" 
+                     (selectionChange)="onFiltroEstatusChange()"
+                     name="filtroEstatus">
+            <mat-option *ngFor="let opt of estatusOptions" [value]="opt.value">
+              {{ opt.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="col-4 col-md-3 d-flex align-items-center">
+        <button 
+          type="button"
+          class="btn btn-outline-secondary w-100" 
+          (click)="clearFilters()">
+          <i class="fas fa-times-circle me-2"></i>
+          <span>Limpiar</span>
+        </button>
+      </div>
+    </form>
+
+    <!-- Tabla -->
+    <div class="table-container position-relative" [class.loading]="loading">
+      <mat-table [dataSource]="dataSource" matSort class="usuarios-table w-100">
+
+        <!-- Columna ID -->
+        <ng-container matColumnDef="id">
+          <mat-header-cell *matHeaderCellDef mat-sort-header>ID</mat-header-cell>
+          <mat-cell *matCellDef="let usuario">{{ usuario.id }}</mat-cell>
+        </ng-container>
+
+        <!-- Columna Nombre de Usuario -->
+        <ng-container matColumnDef="nombreUsuario">
+          <mat-header-cell *matHeaderCellDef mat-sort-header>Nombre de Usuario</mat-header-cell>
+          <mat-cell *matCellDef="let usuario">
+            <div class="d-flex align-items-center">
+              <mat-icon class="text-secondary me-2">account_circle</mat-icon>
+              <span class="fw-medium text-dark">{{ usuario.nombreUsuario }}</span>
+            </div>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Columna Email -->
+        <ng-container matColumnDef="email">
+          <mat-header-cell *matHeaderCellDef mat-sort-header>Correo Electrónico</mat-header-cell>
+          <mat-cell *matCellDef="let usuario">{{ usuario.email }}</mat-cell>
+        </ng-container>
+
+        <!-- Columna Sexo -->
+        <ng-container matColumnDef="sexo">
+          <mat-header-cell *matHeaderCellDef mat-sort-header>Sexo</mat-header-cell>
+          <mat-cell *matCellDef="let usuario">
+            <mat-chip [class]="'sexo-chip-' + usuario.sexo">
+              <mat-icon>{{ usuario.sexo === 0 ? 'male' : 'female' }}</mat-icon>
+              {{ usuario.sexo === 0 ? 'Masculino' : 'Femenino' }}
+            </mat-chip>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Columna Estado -->
+        <ng-container matColumnDef="estatus">
+          <mat-header-cell *matHeaderCellDef mat-sort-header>Estatus</mat-header-cell>
+          <mat-cell *matCellDef="let usuario">
+            <mat-chip [class]="'status-chip-' + usuario.estatus">
+              <mat-icon>{{ usuario.estatus === 1 ? 'check_circle' : 'cancel' }}</mat-icon>
+              {{ usuario.estatus === 1 ? 'Activo' : 'Inactivo' }}
+            </mat-chip>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Columna Acciones -->
+        <ng-container matColumnDef="acciones">
+          <mat-header-cell *matHeaderCellDef>Acciones</mat-header-cell>
+          <mat-cell *matCellDef="let usuario">
+            <div class="actions-cell d-flex gap-1">
+              <button 
+                mat-icon-button 
+                color="primary" 
+                (click)="onEdit(usuario)"
+                matTooltip="Editar usuario">
+                <mat-icon>edit</mat-icon>
+              </button>
+
+              <button 
+                mat-icon-button 
+                [color]="usuario.estatus === 1 ? 'warn' : 'accent'"
+                (click)="onToggle(usuario)"
+                [matTooltip]="usuario.estatus === 1 ? 'Desactivar usuario' : 'Activar usuario'">
+                <mat-icon>{{ usuario.estatus === 1 ? 'block' : 'check_circle' }}</mat-icon>
+              </button>
+            </div>
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns;" class="usuario-row"></mat-row>
+      </mat-table>
+
+      <!-- Estado de carga -->
+      <div *ngIf="loading" class="loading-overlay d-flex flex-column align-items-center justify-content-center">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p class="mt-2 text-muted">Cargando usuarios...</p>
+      </div>
+
+      <!-- Sin resultados -->
+      <div *ngIf="!loading && dataSource.filteredData.length === 0" class="no-results text-center py-5 text-muted">
+        <mat-icon class="fs-1 text-secondary">search_off</mat-icon>
+        <h3 class="h6 mt-2">No se encontraron usuarios coincidentes</h3>
+      </div>
+    </div>
+
+    <!-- Paginador -->
+    <mat-paginator 
+      [pageSizeOptions]="[5, 10, 20, 50]"
+      [pageSize]="10"
+      showFirstLastButtons>
+    </mat-paginator>
+  </div>
+</div>
