@@ -18,8 +18,9 @@ import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthService } from '../../Services/auth';
+import { UsuarioService } from '../../Services/usuario.service';
 import { Usuario, UsuarioTableData, UsuarioEstatus, UsuarioSexo } from '../../Models/usuario/usuario.model';
 import { EditUserDialogComponent } from './edit-user-dialog/edit-user-dialog.component';
 
@@ -52,8 +53,10 @@ import { EditUserDialogComponent } from './edit-user-dialog/edit-user-dialog.com
 })
 export class DashboardComponent implements OnInit, AfterViewInit {
   private authService = inject(AuthService);
+  private usuarioService = inject(UsuarioService);
   private router = inject(Router);
   private dialog = inject(MatDialog) as MatDialog;
+  private snackBar = inject(MatSnackBar);
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -64,7 +67,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   loading = false;
   currentUser$ = this.authService.currentUser$;
   
-  // Filtros
   filtroEstatus: string = 'todos';
   filtroTexto: string = '';
 
@@ -81,14 +83,12 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
-    
-    // Configurar filtro personalizado
     this.dataSource.filterPredicate = this.createFilter();
   }
 
   loadUsuarios(): void {
     this.loading = true;
-    this.authService.getUsuarios().subscribe({
+    this.usuarioService.getUsuarios().subscribe({
       next: (usuarios: Usuario[]) => {
         this.usuarios = usuarios;
         this.updateDataSource();
@@ -97,6 +97,11 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       error: (error: any) => {
         console.error('Error cargando usuarios:', error);
         this.loading = false;
+        this.snackBar.open(
+          'Error al cargar la lista de usuarios: ' + (error.message || 'Fallo de conexión'),
+          'Cerrar',
+          { duration: 5000, panelClass: ['error-snackbar'] }
+        );
       }
     });
   }
@@ -116,12 +121,10 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     return (data: UsuarioTableData, filter: string): boolean => {
       const filterObj = JSON.parse(filter);
       
-      // Filtro por estatus
       if (filterObj.estatus !== 'todos' && data.estatus.toString() !== filterObj.estatus) {
         return false;
       }
       
-      // Filtro por texto
       if (filterObj.texto) {
         const searchText = filterObj.texto.toLowerCase();
         return data.nombreUsuario.toLowerCase().includes(searchText) ||
@@ -172,7 +175,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
     dialogRef.afterClosed().subscribe((result: boolean | undefined) => {
       if (result === true) {
-        this.loadUsuarios(); // Recargar la tabla
+        this.loadUsuarios();
       }
     });
   }
@@ -180,20 +183,29 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   eliminarUsuario(usuario: UsuarioTableData): void {
     const isActivo = usuario.estatus === UsuarioEstatus.Activo;
     const accion = isActivo ? 'desactivar' : 'activar';
+    const accionPasado = isActivo ? 'desactivado' : 'activado';
     
     if (confirm(`¿Estás seguro de que quieres ${accion} al usuario ${usuario.nombreUsuario}?`)) {
-      // Si el usuario está activo, usar DELETE para desactivarlo
-      // Si está inactivo, usar PUT para activarlo
       const request$ = isActivo 
-        ? this.authService.deleteUsuario(usuario.id)
-        : this.authService.updateUsuarioEstatus(usuario.id, UsuarioEstatus.Activo);
+        ? this.usuarioService.deleteUsuario(usuario.id)
+        : this.usuarioService.updateUsuarioEstatus(usuario.id, UsuarioEstatus.Activo);
 
       request$.subscribe({
         next: () => {
-          this.loadUsuarios(); // Recargar la tabla
+          this.snackBar.open(
+            `Usuario "${usuario.nombreUsuario}" ${accionPasado} exitosamente`,
+            'Cerrar',
+            { duration: 3000, panelClass: ['success-snackbar'] }
+          );
+          this.loadUsuarios();
         },
         error: (error: any) => {
-          console.error('Error actualizando usuario:', error);
+          console.error(`Error al ${accion} usuario:`, error);
+          this.snackBar.open(
+            `Error al ${accion} usuario: ` + (error.message || 'Fallo inesperado'),
+            'Cerrar',
+            { duration: 5000, panelClass: ['error-snackbar'] }
+          );
         }
       });
     }

@@ -1,10 +1,11 @@
-import { Injectable, PLATFORM_ID, Inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
 import { environment } from '../Environments/enviroment';
 import { LoginRequest, LoginResponse, User } from '../Models/auth/auth-module';
-import { isPlatformBrowser } from '@angular/common';
+import { TokenService } from './token.service';
+import { ErrorService } from './error.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,22 +14,14 @@ export class AuthService {
   private apiUrl = environment.apiUrl;
   private currentUserSubject: BehaviorSubject<User | null>;
   public currentUser$: Observable<User | null>;
-  private isBrowser: boolean;
 
   constructor(
     private http: HttpClient,
-    @Inject(PLATFORM_ID) private platformId: Object
+    private tokenService: TokenService,
+    private errorService: ErrorService
   ) {
-    this.isBrowser = isPlatformBrowser(this.platformId);
-    let storedUser = null;
-    
-    if (this.isBrowser) {
-      storedUser = localStorage.getItem('currentUser');
-    }
-    
-    this.currentUserSubject = new BehaviorSubject<User | null>(
-      storedUser ? JSON.parse(storedUser) : null
-    );
+    const storedUser = this.tokenService.getUserFromStorage();
+    this.currentUserSubject = new BehaviorSubject<User | null>(storedUser);
     this.currentUser$ = this.currentUserSubject.asObservable();
   }
 
@@ -46,92 +39,29 @@ export class AuthService {
             nombreUsuario: response.nombreUsuario
           };
           
-          if (this.isBrowser) {
-            localStorage.setItem('token', response.token);
-            localStorage.setItem('currentUser', JSON.stringify(user));
-          }
-
+          this.tokenService.setToken(response.token);
+          this.tokenService.setUserInStorage(user);
           this.currentUserSubject.next(user);
         }),
         catchError(error => {
-          return throwError(() => new Error(error.error || 'Error en el inicio de sesion'));
-        })
-      );
-  }
-
-  register(userData: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/Usuario`, userData)
-      .pipe(
-        tap(response => {
-        }),
-        catchError(error => {
-          return throwError(() => new Error(error.error?.message || 'Error al registrar usuario'));
-        })
-      );
-  }
-
-  getUsuarios(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/Usuario`)
-      .pipe(
-        tap(response => {
-        }),
-        catchError(error => {
-          return throwError(() => new Error(error.error?.message || 'Error al obtener usuarios'));
-        })
-      );
-  }
-
-  updateUsuarioEstatus(id: number, estatus: number): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/Usuario/${id}/estatus`, { estatus })
-      .pipe(
-        tap(response => {
-        }),
-        catchError(error => {
-          return throwError(() => new Error(error.error?.message || 'Error al actualizar usuario'));
-        })
-      );
-  }
-
-  deleteUsuario(id: number): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/Usuario/${id}`)
-      .pipe(
-        tap(response => {
-        }),
-        catchError(error => {
-          return throwError(() => new Error(error.error?.message || 'Error al desactivar usuario'));
-        })
-      );
-  }
-
-  updateUsuario(id: number, userData: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/Usuario/${id}`, userData)
-      .pipe(
-        tap(response => {
-        }),
-        catchError(error => {
-          return throwError(() => new Error(error.error?.message || 'Error al actualizar usuario'));
+          return throwError(() => new Error(this.errorService.extractErrorMessage(error, 'Error en el inicio de sesión')));
         })
       );
   }
 
   logout(): void {
-    if (this.isBrowser) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('currentUser');
-    }
+    this.tokenService.removeToken();
+    this.tokenService.removeUserFromStorage();
     this.currentUserSubject.next(null);
   }
 
   isLoggedIn(): boolean {
-    if (!this.isBrowser) {
-      return false;
-    }
-    const token = localStorage.getItem('token');
+    const token = this.tokenService.getToken();
     if (!token) {
       return false;
     }
 
-    if (this.isTokenExpired(token)) {
+    if (this.tokenService.isTokenExpired(token)) {
       this.logout();
       return false;
     }
@@ -139,33 +69,7 @@ export class AuthService {
     return true;
   }
 
-  private isTokenExpired(token: string): boolean {
-    try {
-      const parts = token.split('.');
-      if (parts.length !== 3) {
-        return true; // Token inválido o corrupto
-      }
-
-      const payload = parts[1];
-      // Decodificar Base64 de forma segura (soportando URL-safe base64)
-      const decodedPayload = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
-      const parsedPayload = JSON.parse(decodedPayload);
-
-      if (!parsedPayload.exp) {
-        return false; // Si no tiene fecha de expiración, asumimos que no expira
-      }
-
-      const expirationDate = parsedPayload.exp * 1000;
-      return Date.now() >= expirationDate;
-    } catch (e) {
-      return true; // Si falla la decodificación, asumimos que está expirado/inválido
-    }
-  }
-
   getToken(): string | null {
-    if (!this.isBrowser) {
-      return null;
-    }
-    return localStorage.getItem('token');
+    return this.tokenService.getToken();
   }
 }
