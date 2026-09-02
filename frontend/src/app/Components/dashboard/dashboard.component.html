@@ -4,23 +4,41 @@
     <nav class="navbar navbar-expand-lg bg-white bg-opacity-95 shadow-sm">
       <div class="container-fluid">
         <div class="d-flex align-items-center">
-          <mat-icon>dashboard</mat-icon>
-          <h1 class="fs-5 mb-0 ms-2 fw-semibold">Administración de Usuarios</h1>
+          <mat-icon class="text-primary">dashboard</mat-icon>
+          <h1 class="fs-5 mb-0 ms-2 fw-semibold">{{ 'DASHBOARD.TITLE' | translate }}</h1>
         </div>
         
-        <div class="ms-auto d-flex align-items-center">
+        <div class="ms-auto d-flex align-items-center gap-2">
+          <!-- Language Selector Dropdown -->
+          <div class="btn-group btn-group-sm" role="group" aria-label="Language Selector">
+            <button 
+              type="button" 
+              class="btn btn-outline-secondary"
+              [class.active]="translationService.currentLang === 'es'"
+              (click)="changeLanguage('es')">
+              🇲🇽 ES
+            </button>
+            <button 
+              type="button" 
+              class="btn btn-outline-secondary"
+              [class.active]="translationService.currentLang === 'en'"
+              (click)="changeLanguage('en')">
+              🇺🇸 EN
+            </button>
+          </div>
+
           <button mat-button [matMenuTriggerFor]="userMenu" 
                 class="btn btn-outline-primary rounded-pill d-flex align-items-center">
-            <i class="fas fa-user-circle"></i>
-            <span *ngIf="currentUser$ | async as user" class="ms-2 d-none d-sm-inline">
+            <i class="fas fa-user-circle me-1"></i>
+            <span *ngIf="currentUser$ | async as user" class="ms-1 d-none d-sm-inline">
               {{ user.nombreUsuario || user.email }}
             </span>
           </button>
           
           <mat-menu #userMenu="matMenu">
             <button mat-menu-item (click)="logout()">
-              <i class="fas fa-sign-out-alt"></i>
-              <span>Cerrar Sesión</span>
+              <i class="fas fa-sign-out-alt me-2"></i>
+              <span>{{ 'NAV.LOGOUT' | translate }}</span>
             </button>
           </mat-menu>
         </div>
@@ -44,7 +62,7 @@
                     </div>
                     <div>
                       <h2 class="h1 fw-bold mb-0">{{ getTotalUsuarios() }}</h2>
-                      <p class="text-muted text-uppercase small mb-0 fw-medium">Total Usuarios</p>
+                      <p class="text-muted text-uppercase small mb-0 fw-medium">{{ 'DASHBOARD.STAT_TOTAL' | translate }}</p>
                     </div>
                   </div>
                 </div>
@@ -56,7 +74,7 @@
                     </div>
                     <div>
                       <h2 class="h1 fw-bold mb-0">{{ getUsuariosActivos() }}</h2>
-                      <p class="text-muted text-uppercase small mb-0 fw-medium">Usuarios Activos</p>
+                      <p class="text-muted text-uppercase small mb-0 fw-medium">{{ 'DASHBOARD.STAT_ACTIVE' | translate }}</p>
                     </div>
                   </div>
                 </div>
@@ -68,7 +86,7 @@
                     </div>
                     <div>
                       <h2 class="h1 fw-bold mb-0">{{ getUsuariosInactivos() }}</h2>
-                      <p class="text-muted text-uppercase small mb-0 fw-medium">Usuarios Inactivos</p>
+                      <p class="text-muted text-uppercase small mb-0 fw-medium">{{ 'DASHBOARD.STAT_INACTIVE' | translate }}</p>
                     </div>
                   </div>
                 </div>
@@ -87,7 +105,7 @@
             <div class="card-header bg-light py-3">
               <div class="d-flex align-items-center">
                 <mat-icon class="text-primary me-2">people</mat-icon>
-                <h2 class="h5 card-title fw-bold mb-0">Lista de Usuarios</h2>
+                <h2 class="h5 card-title fw-bold mb-0">{{ 'DASHBOARD.TITLE' | translate }}</h2>
               </div>
             </div>
             
@@ -96,26 +114,25 @@
               <form class="row g-3 mb-4">
                 <div class="col-12 col-md-5 mb-3 mb-md-0">
                   <mat-form-field appearance="outline" class="w-100">
-                    <mat-label>Buscar usuarios</mat-label>
+                    <mat-label>{{ 'DASHBOARD.SEARCH_LABEL' | translate }}</mat-label>
                     <input 
                       matInput 
                       [(ngModel)]="filtroTexto" 
                       (input)="onFiltroTextoChange()"
-                      name="filtroTexto"
-                      placeholder="Nombre, email, etc.">
+                      name="filtroTexto">
                     <mat-icon matSuffix>search</mat-icon>
                   </mat-form-field>
                 </div>
 
                 <div class="col-8 col-md-4 mb-3 mb-md-0">
                   <mat-form-field appearance="outline" class="w-100">
-                    <mat-label>Filtrar por estado</mat-label>
+                    <mat-label>{{ 'DASHBOARD.FILTER_STATUS' | translate }}</mat-label>
                     <mat-select [(value)]="filtroEstatus" 
                                (selectionChange)="onFiltroEstatusChange()"
                                name="filtroEstatus">
-                      <mat-option *ngFor="let option of estatusOptions" [value]="option.value">
-                        {{ option.label }}
-                      </mat-option>
+                      <mat-option value="todos">{{ 'DASHBOARD.FILTER_ALL' | translate }}</mat-option>
+                      <mat-option value="1">{{ 'DASHBOARD.FILTER_ACTIVE' | translate }}</mat-option>
+                      <mat-option value="0">{{ 'DASHBOARD.FILTER_INACTIVE' | translate }}</mat-option>
                     </mat-select>
                   </mat-form-field>
                 </div>
@@ -125,9 +142,8 @@
                     type="button"
                     class="btn btn-outline-secondary w-100" 
                     (click)="clearFilters()">
-                    <i class="fas fa-times-circle d-none d-sm-inline me-2"></i>
-                    <span class="d-none d-sm-inline">Limpiar</span>
-                    <span class="d-sm-none">✓</span>
+                    <i class="fas fa-times-circle me-2"></i>
+                    <span>{{ 'DASHBOARD.CLEAR_FILTERS' | translate }}</span>
                   </button>
                 </div>
               </form>
@@ -138,88 +154,87 @@
                   
                   <!-- Columna ID -->
                   <ng-container matColumnDef="id">
-                    <mat-header-cell *matHeaderCellDef mat-sort-header>ID</mat-header-cell>
+                    <mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'DASHBOARD.TABLE_ID' | translate }}</mat-header-cell>
                     <mat-cell *matCellDef="let usuario">{{ usuario.id }}</mat-cell>
                   </ng-container>
 
-            <!-- Columna Nombre de Usuario -->
-            <ng-container matColumnDef="nombreUsuario">
-              <mat-header-cell *matHeaderCellDef mat-sort-header>Usuario</mat-header-cell>
-              <mat-cell *matCellDef="let usuario">
-                <div class="user-cell">
-                  <mat-icon class="user-avatar">account_circle</mat-icon>
-                  <span class="user-name">{{ usuario.nombreUsuario }}</span>
+                  <!-- Columna Nombre de Usuario -->
+                  <ng-container matColumnDef="nombreUsuario">
+                    <mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'DASHBOARD.TABLE_USER' | translate }}</mat-header-cell>
+                    <mat-cell *matCellDef="let usuario">
+                      <div class="user-cell">
+                        <mat-icon class="user-avatar">account_circle</mat-icon>
+                        <span class="user-name">{{ usuario.nombreUsuario }}</span>
+                      </div>
+                    </mat-cell>
+                  </ng-container>
+
+                  <!-- Columna Email -->
+                  <ng-container matColumnDef="email">
+                    <mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'DASHBOARD.TABLE_EMAIL' | translate }}</mat-header-cell>
+                    <mat-cell *matCellDef="let usuario">{{ usuario.email }}</mat-cell>
+                  </ng-container>
+
+                  <!-- Columna Sexo -->
+                  <ng-container matColumnDef="sexo">
+                    <mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'DASHBOARD.TABLE_GENDER' | translate }}</mat-header-cell>
+                    <mat-cell *matCellDef="let usuario">
+                      <mat-chip [class]="'sexo-chip-' + usuario.sexo">
+                        <mat-icon>{{ usuario.sexo === 0 ? 'male' : 'female' }}</mat-icon>
+                        {{ usuario.sexo === 0 ? ('REGISTER.GENDER_MALE' | translate) : ('REGISTER.GENDER_FEMALE' | translate) }}
+                      </mat-chip>
+                    </mat-cell>
+                  </ng-container>
+
+                  <!-- Columna Estado -->
+                  <ng-container matColumnDef="estatus">
+                    <mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'DASHBOARD.TABLE_STATUS' | translate }}</mat-header-cell>
+                    <mat-cell *matCellDef="let usuario">
+                      <mat-chip [class]="'status-chip-' + usuario.estatus">
+                        <mat-icon>{{ usuario.estatus === 1 ? 'check_circle' : 'cancel' }}</mat-icon>
+                        {{ usuario.estatus === 1 ? ('DASHBOARD.STATUS_ACTIVE' | translate) : ('DASHBOARD.STATUS_INACTIVE' | translate) }}
+                      </mat-chip>
+                    </mat-cell>
+                  </ng-container>
+
+                  <!-- Columna Acciones -->
+                  <ng-container matColumnDef="acciones">
+                    <mat-header-cell *matHeaderCellDef>{{ 'DASHBOARD.TABLE_ACTIONS' | translate }}</mat-header-cell>
+                    <mat-cell *matCellDef="let usuario">
+                      <div class="actions-cell">
+                        <button 
+                          mat-icon-button 
+                          color="primary" 
+                          (click)="editarUsuario(usuario)"
+                          [matTooltip]="'DASHBOARD.ACTION_EDIT' | translate">
+                          <mat-icon>edit</mat-icon>
+                        </button>
+                        
+                        <button 
+                          mat-icon-button 
+                          [color]="usuario.estatus === 1 ? 'warn' : 'accent'"
+                          (click)="eliminarUsuario(usuario)"
+                          [matTooltip]="usuario.estatus === 1 ? ('DASHBOARD.ACTION_DEACTIVATE' | translate) : ('DASHBOARD.ACTION_ACTIVATE' | translate)">
+                          <mat-icon>{{ usuario.estatus === 1 ? 'block' : 'check_circle' }}</mat-icon>
+                        </button>
+                      </div>
+                    </mat-cell>
+                  </ng-container>
+
+                  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                  <mat-row *matRowDef="let row; columns: displayedColumns;" class="usuario-row"></mat-row>
+                </mat-table>
+
+                <!-- Estado de carga -->
+                <div *ngIf="loading" class="loading-overlay">
+                  <mat-spinner diameter="50"></mat-spinner>
+                  <p>{{ 'COMMON.LOADING' | translate }}</p>
                 </div>
-              </mat-cell>
-            </ng-container>
-
-            <!-- Columna Email -->
-            <ng-container matColumnDef="email">
-              <mat-header-cell *matHeaderCellDef mat-sort-header>Email</mat-header-cell>
-              <mat-cell *matCellDef="let usuario">{{ usuario.email }}</mat-cell>
-            </ng-container>
-
-            <!-- Columna Sexo -->
-            <ng-container matColumnDef="sexo">
-              <mat-header-cell *matHeaderCellDef mat-sort-header>Sexo</mat-header-cell>
-              <mat-cell *matCellDef="let usuario">
-                <mat-chip [class]="'sexo-chip-' + usuario.sexo">
-                  <mat-icon>{{ usuario.sexo === 0 ? 'male' : 'female' }}</mat-icon>
-                  {{ usuario.sexoText }}
-                </mat-chip>
-              </mat-cell>
-            </ng-container>
-
-            <!-- Columna Estado -->
-            <ng-container matColumnDef="estatus">
-              <mat-header-cell *matHeaderCellDef mat-sort-header>Estado</mat-header-cell>
-              <mat-cell *matCellDef="let usuario">
-                <mat-chip [class]="'status-chip-' + usuario.estatus">
-                  <mat-icon>{{ usuario.estatus === 1 ? 'check_circle' : 'cancel' }}</mat-icon>
-                  {{ usuario.estatusText }}
-                </mat-chip>
-              </mat-cell>
-            </ng-container>
-
-            <!-- Columna Acciones -->
-            <ng-container matColumnDef="acciones">
-              <mat-header-cell *matHeaderCellDef>Acciones</mat-header-cell>
-              <mat-cell *matCellDef="let usuario">
-                <div class="actions-cell">
-                  <button 
-                    mat-icon-button 
-                    color="primary" 
-                    (click)="editarUsuario(usuario)"
-                    matTooltip="Editar usuario">
-                    <mat-icon>edit</mat-icon>
-                  </button>
-                  
-                  <button 
-                    mat-icon-button 
-                    [color]="usuario.estatus === 1 ? 'warn' : 'accent'"
-                    (click)="eliminarUsuario(usuario)"
-                    [matTooltip]="usuario.estatus === 1 ? 'Desactivar usuario' : 'Activar usuario'">
-                    <mat-icon>{{ usuario.estatus === 1 ? 'block' : 'check_circle' }}</mat-icon>
-                  </button>
-                </div>
-              </mat-cell>
-            </ng-container>
-
-            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-            <mat-row *matRowDef="let row; columns: displayedColumns;" class="usuario-row"></mat-row>
-          </mat-table>
-
-          <!-- Estado de carga -->
-          <div *ngIf="loading" class="loading-overlay">
-            <mat-spinner diameter="50"></mat-spinner>
-            <p>Cargando usuarios...</p>
-          </div>
 
                 <!-- Sin resultados -->
                 <div *ngIf="!loading && dataSource.filteredData.length === 0" class="no-results">
                   <mat-icon class="no-results-icon">search_off</mat-icon>
-                  <h3>No se encontraron usuarios</h3>
-                  <p>Intenta ajustar los filtros de búsqueda</p>
+                  <h3>{{ 'DASHBOARD.NO_DATA' | translate }}</h3>
                 </div>
               </div>
 
@@ -227,8 +242,7 @@
               <mat-paginator 
                 [pageSizeOptions]="[5, 10, 20, 50]"
                 [pageSize]="10"
-                showFirstLastButtons
-                aria-label="Seleccionar página de usuarios">
+                showFirstLastButtons>
               </mat-paginator>
             </div>
           </div>

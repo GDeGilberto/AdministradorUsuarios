@@ -2,7 +2,7 @@
   <div class="modal-header bg-primary text-white">
     <h4 class="modal-title d-flex align-items-center mb-0">
       <mat-icon class="me-2 d-none d-sm-block">edit</mat-icon>
-      Editar Usuario
+      {{ 'EDIT_DIALOG.TITLE' | translate }}
     </h4>
   </div>
   
@@ -12,95 +12,70 @@
         <div class="row g-2 g-md-3">
           <div class="col-12 col-md-6">
             <mat-form-field appearance="outline" class="w-100">
-              <mat-label>Nombre de Usuario</mat-label>
-              <input matInput formControlName="nombreUsuario" placeholder="Ingrese el nombre de usuario">
+              <mat-label>{{ 'REGISTER.USERNAME' | translate }}</mat-label>
+              <input matInput formControlName="nombreUsuario">
               <mat-icon matSuffix>person</mat-icon>
               <mat-error *ngIf="editForm.get('nombreUsuario')?.hasError('required')">
-                El nombre es requerido
+                {{ 'REGISTER.USERNAME_REQUIRED' | translate }}
               </mat-error>
               <mat-error *ngIf="editForm.get('nombreUsuario')?.hasError('minlength')">
-                Mín. 3 caracteres
+                {{ 'REGISTER.USERNAME_MIN' | translate }}
               </mat-error>
             </mat-form-field>
           </div>
 
           <div class="col-12 col-md-6">
             <mat-form-field appearance="outline" class="w-100">
-              <mat-label>Email</mat-label>
-              <input matInput type="email" formControlName="email" placeholder="usuario@ejemplo.com">
+              <mat-label>{{ 'LOGIN.EMAIL' | translate }}</mat-label>
+              <input matInput type="email" formControlName="email">
               <mat-icon matSuffix>email</mat-icon>
               <mat-error *ngIf="editForm.get('email')?.hasError('required')">
-                Email requerido
+                {{ 'LOGIN.EMAIL_REQUIRED' | translate }}
               </mat-error>
               <mat-error *ngIf="editForm.get('email')?.hasError('email')">
-                Email inválido
+                {{ 'LOGIN.EMAIL_INVALID' | translate }}
               </mat-error>
             </mat-form-field>
           </div>
 
           <div class="col-md-6">
             <mat-form-field appearance="outline" class="w-100">
-              <mat-label>Contraseña (opcional)</mat-label>
-              <input matInput type="password" formControlName="contraseña" placeholder="Dejar vacío para no cambiar">
+              <mat-label>{{ 'EDIT_DIALOG.OPTIONAL_PASSWORD' | translate }}</mat-label>
+              <input matInput type="password" formControlName="contraseña">
               <mat-icon matSuffix>lock</mat-icon>
               <mat-error *ngIf="editForm.hasError('passwordTooShort')">
-                Mínimo 8 caracteres
-              </mat-error>
-              <mat-error *ngIf="editForm.hasError('passwordIncomplete')">
-                Complete ambos campos de contraseña
+                {{ 'REGISTER.PASSWORD_STRENGTH' | translate }}
               </mat-error>
             </mat-form-field>
           </div>
 
           <div class="col-md-6">
             <mat-form-field appearance="outline" class="w-100">
-              <mat-label>Confirmar Contraseña</mat-label>
-              <input matInput type="password" formControlName="confirmarContraseña" placeholder="Confirme la nueva contraseña">
+              <mat-label>{{ 'REGISTER.CONFIRM_PASSWORD' | translate }}</mat-label>
+              <input matInput type="password" formControlName="confirmarContraseña">
               <mat-icon matSuffix>lock_outline</mat-icon>
               <mat-error *ngIf="editForm.hasError('passwordMismatch') && editForm.get('confirmarContraseña')?.touched">
-                Las contraseñas no coinciden
-              </mat-error>
-              <mat-error *ngIf="editForm.hasError('passwordIncomplete')">
-                Complete ambos campos de contraseña
+                {{ 'REGISTER.PASSWORD_MISMATCH' | translate }}
               </mat-error>
             </mat-form-field>
           </div>
 
           <div class="col-12">
             <mat-form-field appearance="outline" class="w-100">
-              <mat-label>Sexo</mat-label>
+              <mat-label>{{ 'REGISTER.GENDER' | translate }}</mat-label>
               <mat-select formControlName="sexo" panelClass="custom-select-panel" [disableOptionCentering]="true">
-                <mat-option [value]="0">Masculino</mat-option>
-                <mat-option [value]="1">Femenino</mat-option>
+                <mat-option [value]="0">{{ 'REGISTER.GENDER_MALE' | translate }}</mat-option>
+                <mat-option [value]="1">{{ 'REGISTER.GENDER_FEMALE' | translate }}</mat-option>
               </mat-select>
               <mat-icon matSuffix>wc</mat-icon>
-              <mat-error *ngIf="editForm.get('sexo')?.hasError('required')">
-                El sexo es requerido
-              </mat-error>
             </mat-form-field>
-            
-            <!-- Alternativa con select nativo por si el Material Select falla -->
-            <!-- 
-            <div class="form-group">
-              <label for="sexoSelect" class="form-label">Sexo</label>
-              <select id="sexoSelect" class="form-select" formControlName="sexo">
-                <option value="">Seleccione...</option>
-                <option value="0">Masculino</option>
-                <option value="1">Femenino</option>
-              </select>
-              <div *ngIf="editForm.get('sexo')?.hasError('required')" class="text-danger small mt-1">
-                El sexo es requerido
-              </div>
-            </div>
-            -->
           </div>
         </div>
 
-        <!-- Loading overlay -->
         <div *ngIf="isLoading" class="loading-overlay d-flex justify-content-center align-items-center">
           <div class="text-center">
             <mat-spinner diameter="40"></mat-spinner>
-            <p class="mt-2 mb-0 text-muted">Actualizando usuario...</p>
+            <p class="mt-2 mb-0 text-muted">{{ 'COMMON.LOADING' | translate }}</p>
           </div>
         </div>
       </div>
@@ -113,7 +88,7 @@
           class="btn btn-primary order-sm-2"
           [disabled]="editForm.invalid || isLoading">
           <mat-icon class="me-1 d-none d-sm-inline">{{ isLoading ? 'hourglass_empty' : 'save' }}</mat-icon>
-          {{ isLoading ? 'Guardando...' : 'Guardar Cambios' }}
+          {{ isLoading ? ('COMMON.LOADING' | translate) : ('EDIT_DIALOG.SAVE' | translate) }}
         </button>
         <button 
           type="button" 
@@ -121,7 +96,7 @@
           (click)="onCancel()" 
           [disabled]="isLoading">
           <mat-icon class="me-1 d-none d-sm-inline">close</mat-icon>
-          Cancelar
+          {{ 'EDIT_DIALOG.CANCEL' | translate }}
         </button>
       </div>
     </div>

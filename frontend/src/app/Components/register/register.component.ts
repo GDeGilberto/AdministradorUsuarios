@@ -3,12 +3,14 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractContro
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { UsuarioService } from '../../Services/usuario.service';
+import { TranslationService, SupportedLang } from '../../Services/translation.service';
+import { TranslatePipe } from '../../Pipes/translate.pipe';
 import { finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, TranslatePipe],
   templateUrl: './register.component.html',
   styleUrl: './register.component.css'
 })
@@ -17,16 +19,12 @@ export class RegisterComponent implements OnInit {
   private usuarioService = inject(UsuarioService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
+  public translationService = inject(TranslationService);
 
   registerForm!: FormGroup;
   loading = false;
   errorMessage = '';
   successMessage = '';
-  
-  sexoOptions = [
-    { value: 0, label: 'Masculino' },
-    { value: 1, label: 'Femenino' }
-  ];
 
   ngOnInit(): void {
     this.registerForm = this.formBuilder.group({
@@ -46,6 +44,10 @@ export class RegisterComponent implements OnInit {
     }, {
       validators: this.passwordMatchValidator
     });
+  }
+
+  changeLanguage(lang: SupportedLang): void {
+    this.translationService.setLanguage(lang);
   }
 
   alphanumericValidator(control: AbstractControl): ValidationErrors | null {
@@ -114,7 +116,7 @@ export class RegisterComponent implements OnInit {
         .subscribe({
           next: () => {
             this.loading = false;
-            this.successMessage = 'Usuario registrado exitosamente. Redirigiendo al login...';
+            this.successMessage = this.translationService.translate('REGISTER.SUCCESS');
             this.cdr.detectChanges();
             setTimeout(() => {
               this.router.navigate(['/login']);
@@ -127,7 +129,7 @@ export class RegisterComponent implements OnInit {
             } else if (error?.message && typeof error.message === 'string') {
               this.errorMessage = error.message;
             } else {
-              this.errorMessage = 'Error al registrar usuario. Inténtalo de nuevo.';
+              this.errorMessage = this.translationService.translate('COMMON.ERROR');
             }
             this.cdr.detectChanges();
           }

@@ -12,6 +12,8 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { UsuarioTableData } from '../../../Models/usuario/usuario.model';
 import { UsuarioService } from '../../../Services/usuario.service';
+import { TranslationService } from '../../../Services/translation.service';
+import { TranslatePipe } from '../../../Pipes/translate.pipe';
 
 function passwordMatchValidator(control: AbstractControl): {[key: string]: any} | null {
   const password = control.get('contraseña');
@@ -48,7 +50,8 @@ function passwordMatchValidator(control: AbstractControl): {[key: string]: any} 
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    TranslatePipe
   ],
   templateUrl: './edit-user-dialog.component.html',
   styleUrls: ['./edit-user-dialog.component.css']
@@ -60,6 +63,7 @@ export class EditUserDialogComponent {
   constructor(
     private fb: FormBuilder,
     private usuarioService: UsuarioService,
+    private translationService: TranslationService,
     private snackBar: MatSnackBar,
     private dialogRef: MatDialogRef<EditUserDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: UsuarioTableData
@@ -92,19 +96,27 @@ export class EditUserDialogComponent {
       this.usuarioService.updateUsuario(this.data.id, updateData).subscribe({
         next: () => {
           this.isLoading = false;
-          this.snackBar.open('Usuario actualizado exitosamente', 'Cerrar', {
-            duration: 3000,
-            panelClass: ['success-snackbar']
-          });
+          this.snackBar.open(
+            this.translationService.translate('EDIT_DIALOG.SUCCESS'),
+            this.translationService.translate('COMMON.CLOSE'),
+            {
+              duration: 3000,
+              panelClass: ['success-snackbar']
+            }
+          );
           this.dialogRef.close(true);
         },
         error: (error) => {
           this.isLoading = false;
           console.error('Error actualizando usuario:', error);
-          this.snackBar.open('Error al actualizar usuario: ' + error.message, 'Cerrar', {
-            duration: 5000,
-            panelClass: ['error-snackbar']
-          });
+          this.snackBar.open(
+            error.message || this.translationService.translate('COMMON.ERROR'),
+            this.translationService.translate('COMMON.CLOSE'),
+            {
+              duration: 5000,
+              panelClass: ['error-snackbar']
+            }
+          );
         }
       });
     }
