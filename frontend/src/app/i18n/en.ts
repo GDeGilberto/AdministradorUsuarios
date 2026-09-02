@@ -80,5 +80,6 @@ export const en = {
   // Common / Notifications
   'COMMON.CLOSE': 'Close',
   'COMMON.LOADING': 'Loading...',
-  'COMMON.ERROR': 'Error'
+  'COMMON.ERROR': 'Error',
+  'COMMON.SESSION_EXPIRED': 'Session has expired. Please log in again.'
 };
