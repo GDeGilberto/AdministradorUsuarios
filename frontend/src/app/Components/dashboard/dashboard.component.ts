@@ -21,6 +21,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthService } from '../../Services/auth';
 import { UsuarioService } from '../../Services/usuario.service';
+import { TranslationService, SupportedLang } from '../../Services/translation.service';
+import { TranslatePipe } from '../../Pipes/translate.pipe';
 import { Usuario, UsuarioTableData, UsuarioEstatus, UsuarioSexo } from '../../Models/usuario/usuario.model';
 import { EditUserDialogComponent } from './edit-user-dialog/edit-user-dialog.component';
 
@@ -46,7 +48,8 @@ import { EditUserDialogComponent } from './edit-user-dialog/edit-user-dialog.com
     MatMenuModule,
     MatTooltipModule,
     MatProgressSpinnerModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    TranslatePipe
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
@@ -54,6 +57,7 @@ import { EditUserDialogComponent } from './edit-user-dialog/edit-user-dialog.com
 export class DashboardComponent implements OnInit, AfterViewInit {
   private authService = inject(AuthService);
   private usuarioService = inject(UsuarioService);
+  public translationService = inject(TranslationService);
   private router = inject(Router);
   private dialog = inject(MatDialog) as MatDialog;
   private snackBar = inject(MatSnackBar);
@@ -70,12 +74,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   filtroEstatus: string = 'todos';
   filtroTexto: string = '';
 
-  estatusOptions = [
-    { value: 'todos', label: 'Todos los usuarios' },
-    { value: '1', label: 'Activos' },
-    { value: '0', label: 'Inactivos' }
-  ];
-
   ngOnInit(): void {
     this.loadUsuarios();
   }
@@ -84,6 +82,10 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
     this.dataSource.filterPredicate = this.createFilter();
+  }
+
+  changeLanguage(lang: SupportedLang): void {
+    this.translationService.setLanguage(lang);
   }
 
   loadUsuarios(): void {
@@ -98,8 +100,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         console.error('Error cargando usuarios:', error);
         this.loading = false;
         this.snackBar.open(
-          'Error al cargar la lista de usuarios: ' + (error.message || 'Fallo de conexión'),
-          'Cerrar',
+          error.message || this.translationService.translate('COMMON.ERROR'),
+          this.translationService.translate('COMMON.CLOSE'),
           { duration: 5000, panelClass: ['error-snackbar'] }
         );
       }
@@ -182,28 +184,35 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
   eliminarUsuario(usuario: UsuarioTableData): void {
     const isActivo = usuario.estatus === UsuarioEstatus.Activo;
-    const accion = isActivo ? 'desactivar' : 'activar';
-    const accionPasado = isActivo ? 'desactivado' : 'activado';
+    const accionKey = isActivo ? 'desactivar' : 'activar';
+    const confirmMessage = this.translationService.translate('DASHBOARD.CONFIRM_TOGGLE', {
+      accion: accionKey,
+      usuario: usuario.nombreUsuario
+    });
     
-    if (confirm(`¿Estás seguro de que quieres ${accion} al usuario ${usuario.nombreUsuario}?`)) {
+    if (confirm(confirmMessage)) {
       const request$ = isActivo 
         ? this.usuarioService.deleteUsuario(usuario.id)
         : this.usuarioService.updateUsuarioEstatus(usuario.id, UsuarioEstatus.Activo);
 
       request$.subscribe({
         next: () => {
+          const successMsg = this.translationService.translate('DASHBOARD.TOGGLE_SUCCESS', {
+            usuario: usuario.nombreUsuario,
+            accion: isActivo ? 'desactivado' : 'activado'
+          });
           this.snackBar.open(
-            `Usuario "${usuario.nombreUsuario}" ${accionPasado} exitosamente`,
-            'Cerrar',
+            successMsg,
+            this.translationService.translate('COMMON.CLOSE'),
             { duration: 3000, panelClass: ['success-snackbar'] }
           );
           this.loadUsuarios();
         },
         error: (error: any) => {
-          console.error(`Error al ${accion} usuario:`, error);
+          console.error(`Error al actualizar usuario:`, error);
           this.snackBar.open(
-            `Error al ${accion} usuario: ` + (error.message || 'Fallo inesperado'),
-            'Cerrar',
+            error.message || this.translationService.translate('COMMON.ERROR'),
+            this.translationService.translate('COMMON.CLOSE'),
             { duration: 5000, panelClass: ['error-snackbar'] }
           );
         }

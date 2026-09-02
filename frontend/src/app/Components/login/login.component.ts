@@ -1,15 +1,17 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { finalize } from 'rxjs/operators';
 import { environment } from '../../Environments/enviroment';
 import { AuthService } from '../../Services/auth';
+import { TranslationService, SupportedLang } from '../../Services/translation.service';
+import { TranslatePipe } from '../../Pipes/translate.pipe';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, TranslatePipe],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
@@ -22,15 +24,13 @@ export class LoginComponent implements OnInit {
   environment = environment;
   returnUrl = '';
 
-  constructor(
-    private formBuilder: FormBuilder,
-    private router: Router,
-    private route: ActivatedRoute,
-    private authService: AuthService
-  ) {}
+  private formBuilder = inject(FormBuilder);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private authService = inject(AuthService);
+  public translationService = inject(TranslationService);
 
   ngOnInit(): void {
-    // Obtener la URL de retorno si existe
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
 
     this.loginForm = this.formBuilder.group({
@@ -41,6 +41,10 @@ export class LoginComponent implements OnInit {
 
   togglePassword(): void {
     this.showPassword = !this.showPassword;
+  }
+
+  changeLanguage(lang: SupportedLang): void {
+    this.translationService.setLanguage(lang);
   }
 
   fillTestData(): void {
@@ -65,23 +69,16 @@ export class LoginComponent implements OnInit {
     this.authService.login(credentials)
       .pipe(finalize(() => this.loading = false))
       .subscribe({
-        next: (response: any) => {
+        next: () => {
           this.loading = false;
-          this.successMessage = '¡Login exitoso! Redirigiendo...';
-          
+          this.successMessage = this.translationService.translate('LOGIN.SUCCESS');
           setTimeout(() => {
             this.router.navigate([this.returnUrl]);
           }, 1500);
         },
         error: (error: any) => {
           this.loading = false;
-          if (error && typeof error.message === 'string') {
-            this.errorMessage = error.message;
-          } else if (typeof error === 'string') {
-            this.errorMessage = error;
-          } else {
-            this.errorMessage = 'Error inesperado. Intenta nuevamente.';
-          }
+          this.errorMessage = error.message || this.translationService.translate('COMMON.ERROR');
         }
       });
   }
