@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { AddUsuarioRequest, UsuarioResponse } from '../Models/usuario/usuario-module';
 import { environment } from '../Environments/enviroment';
+import { ErrorService } from './error.service';
+import { Usuario } from '../Models/usuario/usuario.model';
 
 @Injectable({
   providedIn: 'root'
@@ -11,49 +12,43 @@ import { environment } from '../Environments/enviroment';
 export class UsuarioService {
   private apiUrl = `${environment.apiUrl}/Usuario`;
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private errorService: ErrorService
+  ) { }
 
-  createUsuario(usuario: AddUsuarioRequest): Observable<UsuarioResponse> {
-    return this.http.post<UsuarioResponse>(this.apiUrl, usuario)
+  getUsuarios(): Observable<Usuario[]> {
+    return this.http.get<Usuario[]>(this.apiUrl)
       .pipe(
-        catchError(this.handleError)
+        catchError(error => throwError(() => new Error(this.errorService.extractErrorMessage(error, 'Error al obtener lista de usuarios'))))
       );
   }
 
-  getUsuarios(): Observable<UsuarioResponse[]> {
-    return this.http.get<UsuarioResponse[]>(this.apiUrl)
+  createUsuario(userData: any): Observable<any> {
+    return this.http.post<any>(this.apiUrl, userData)
       .pipe(
-        catchError(this.handleError)
+        catchError(error => throwError(() => new Error(this.errorService.extractErrorMessage(error, 'Error al crear usuario'))))
       );
   }
 
-  private handleError(error: HttpErrorResponse): Observable<never> {
-    let errorMessage = 'Error desconocido';
+  updateUsuario(id: number, userData: any): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/${id}`, userData)
+      .pipe(
+        catchError(error => throwError(() => new Error(this.errorService.extractErrorMessage(error, 'Error al actualizar usuario'))))
+      );
+  }
 
-    if (error.error instanceof ErrorEvent) {
-      // Client-side error
-      errorMessage = `Error: ${error.error.message}`;
-    } else {
-      // Server-side error
-      if (error.status === 400 && error.error) {
-        // Handle validation errors
-        if (typeof error.error === 'string') {
-          errorMessage = error.error;
-        } else if (error.error.errors) {
-          const validationErrors = [];
-          for (const key in error.error.errors) {
-            if (error.error.errors[key]) {
-              validationErrors.push(error.error.errors[key]);
-            }
-          }
-          errorMessage = validationErrors.join('. ');
-        }
-      } else {
-        errorMessage = `Código: ${error.status}, Mensaje: ${error.statusText || error.message}`;
-      }
-    }
+  updateUsuarioEstatus(id: number, estatus: number): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/${id}/estatus`, { estatus })
+      .pipe(
+        catchError(error => throwError(() => new Error(this.errorService.extractErrorMessage(error, 'Error al actualizar estatus de usuario'))))
+      );
+  }
 
-    console.error(errorMessage);
-    return throwError(() => new Error(errorMessage));
+  deleteUsuario(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/${id}`)
+      .pipe(
+        catchError(error => throwError(() => new Error(this.errorService.extractErrorMessage(error, 'Error al eliminar/desactivar usuario'))))
+      );
   }
 }

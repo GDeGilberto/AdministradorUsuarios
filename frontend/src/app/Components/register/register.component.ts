@@ -2,18 +2,19 @@ import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../../Services/auth';
+import { UsuarioService } from '../../Services/usuario.service';
 import { finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-register',
+  standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './register.component.html',
   styleUrl: './register.component.css'
 })
 export class RegisterComponent implements OnInit {
   private formBuilder = inject(FormBuilder);
-  private authService = inject(AuthService);
+  private usuarioService = inject(UsuarioService);
   private router = inject(Router);
 
   registerForm!: FormGroup;
@@ -46,14 +47,12 @@ export class RegisterComponent implements OnInit {
     });
   }
 
-  // Validador alfanumérico
   alphanumericValidator(control: AbstractControl): ValidationErrors | null {
     const value = control.value;
     if (!value) return null;
     return /^[a-zA-Z0-9]+$/.test(value) ? null : { alphanumeric: true };
   }
 
-  // Validador de contraseña fuerte
   passwordStrengthValidator(control: AbstractControl): ValidationErrors | null {
     const value = control.value;
     if (!value) return null;
@@ -70,7 +69,6 @@ export class RegisterComponent implements OnInit {
     return { passwordStrength: true };
   }
 
-  // Validador para confirmar contraseñas
   passwordMatchValidator(form: AbstractControl): ValidationErrors | null {
     const password = form.get('contraseña');
     const confirmPassword = form.get('confirmarContraseña');
@@ -107,11 +105,11 @@ export class RegisterComponent implements OnInit {
         sexo: parseInt(formData.sexo)
       };
 
-      this.authService.register(registerData)
+      this.usuarioService.createUsuario(registerData)
         .pipe(finalize(() => this.loading = false))
         .subscribe({
-          next: (response: any) => {
-            this.successMessage = 'Usuario registrado exitosamente. Redirigiendo...';
+          next: () => {
+            this.successMessage = 'Usuario registrado exitosamente. Redirigiendo al login...';
             setTimeout(() => {
               this.router.navigate(['/login']);
             }, 2000);

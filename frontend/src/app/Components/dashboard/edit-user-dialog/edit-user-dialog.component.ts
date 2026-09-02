@@ -10,10 +10,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { UsuarioTableData, UsuarioSexo, UsuarioEstatus } from '../../../Models/usuario/usuario.model';
-import { AuthService } from '../../../Services/auth';
+import { UsuarioTableData } from '../../../Models/usuario/usuario.model';
+import { UsuarioService } from '../../../Services/usuario.service';
 
-// Validador personalizado para confirmar contraseñas
 function passwordMatchValidator(control: AbstractControl): {[key: string]: any} | null {
   const password = control.get('contraseña');
   const confirmPassword = control.get('confirmarContraseña');
@@ -22,14 +21,11 @@ function passwordMatchValidator(control: AbstractControl): {[key: string]: any} 
     if (password.value !== confirmPassword.value) {
       return { passwordMismatch: true };
     }
-    
-    // Validar longitud mínima si se proporciona contraseña
     if (password.value.length < 8) {
       return { passwordTooShort: true };
     }
   }
   
-  // Si se llena una contraseña, ambas deben estar llenas
   if ((password?.value && !confirmPassword?.value) || (!password?.value && confirmPassword?.value)) {
     return { passwordIncomplete: true };
   }
@@ -63,7 +59,7 @@ export class EditUserDialogComponent {
 
   constructor(
     private fb: FormBuilder,
-    private authService: AuthService,
+    private usuarioService: UsuarioService,
     private snackBar: MatSnackBar,
     private dialogRef: MatDialogRef<EditUserDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: UsuarioTableData
@@ -71,8 +67,8 @@ export class EditUserDialogComponent {
     this.editForm = this.fb.group({
       nombreUsuario: [data.nombreUsuario, [Validators.required, Validators.minLength(3)]],
       email: [data.email, [Validators.required, Validators.email]],
-      contraseña: [''], // Opcional
-      confirmarContraseña: [''], // Opcional
+      contraseña: [''],
+      confirmarContraseña: [''],
       sexo: [data.sexo !== undefined ? data.sexo : null, [Validators.required]]
     }, { validators: passwordMatchValidator });
   }
@@ -88,20 +84,19 @@ export class EditUserDialogComponent {
         sexo: formValue.sexo
       };
 
-      // Solo incluir contraseñas si se proporcionaron
       if (formValue.contraseña && formValue.contraseña.trim()) {
         updateData.contraseña = formValue.contraseña;
         updateData.confirmarContraseña = formValue.confirmarContraseña;
       }
 
-      this.authService.updateUsuario(this.data.id, updateData).subscribe({
-        next: (response) => {
+      this.usuarioService.updateUsuario(this.data.id, updateData).subscribe({
+        next: () => {
           this.isLoading = false;
           this.snackBar.open('Usuario actualizado exitosamente', 'Cerrar', {
             duration: 3000,
             panelClass: ['success-snackbar']
           });
-          this.dialogRef.close(true); // Devolvemos true para indicar éxito
+          this.dialogRef.close(true);
         },
         error: (error) => {
           this.isLoading = false;
