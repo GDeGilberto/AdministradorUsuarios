@@ -8,10 +8,12 @@ namespace Application.UseCases
     public class UpdateUsuarioUseCase
     {
         private readonly IRepository<Usuario> _repository;
+        private readonly IPasswordHasher _passwordHasher;
 
-        public UpdateUsuarioUseCase(IRepository<Usuario> repository)
+        public UpdateUsuarioUseCase(IRepository<Usuario> repository, IPasswordHasher passwordHasher)
         {
             _repository = repository;
+            _passwordHasher = passwordHasher;
         }
 
         public async Task ExecuteAsync(int id, UpdateUsuarioDTO usuarioDTO)
@@ -26,16 +28,23 @@ namespace Application.UseCases
             var validationContext = new ValidationContext(usuarioDTO);
             Validator.ValidateObject(usuarioDTO, validationContext, true);
 
+            string passwordToPersist;
             if (!string.IsNullOrEmpty(usuarioDTO.Contraseña))
             {
                 if (usuarioDTO.Contraseña != usuarioDTO.ConfirmarContraseña)
                     throw new ValidationException("Las contraseñas no coinciden");
+
+                passwordToPersist = _passwordHasher.HashPassword(usuarioDTO.Contraseña);
+            }
+            else
+            {
+                passwordToPersist = usuario.Contraseña;
             }
 
             var updatedUsuario = new Usuario(
                 usuarioDTO.Email ?? usuario.Email,
                 usuarioDTO.NombreUsuario ?? usuario.NombreUsuario,
-                usuarioDTO.Contraseña ?? usuario.Contraseña,
+                passwordToPersist,
                 usuario.Estatus,
                 usuarioDTO.Sexo ?? usuario.Sexo
             );

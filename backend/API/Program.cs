@@ -137,6 +137,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<IRepository<Usuario>, UsuarioRepository>();
 
 // Register Services
+builder.Services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 // Register Mappers & Presenters
