@@ -15,11 +15,16 @@ namespace Infrastructure.Services
     {
         private readonly ApplicationDbContext _db;
         private readonly IConfiguration _configuration;
+        private readonly IPasswordHasher _passwordHasher;
 
-        public AuthService(ApplicationDbContext db, IConfiguration configuration)
+        public AuthService(
+            ApplicationDbContext db, 
+            IConfiguration configuration,
+            IPasswordHasher passwordHasher)
         {
             _db = db;
             _configuration = configuration;
+            _passwordHasher = passwordHasher;
         }
 
         public async Task<Usuario> ValidateUserAsync(string email, string contraseña)
@@ -29,11 +34,40 @@ namespace Infrastructure.Services
                 .FirstOrDefaultAsync(u => u.Email == email && u.Estatus == true);
 
             if (usuarioModel == null)
-                return null;
+            {
+                // Mitigación de Timing Attack: ejecuta cómputo de BCrypt para igualar tiempos de respuesta
+                _passwordHasher.PerformDummyVerification(contraseña);
+                return null!;
+            }
 
-            // Verificar la contraseña
-            if (usuarioModel.Contraseña != contraseña)
-                return null;
+            bool isValid = false;
+
+            // 1. Verificación para contraseñas legadas en texto plano (Zero-Downtime Migration)
+            if (!_passwordHasher.IsHashed(usuarioModel.Contraseña))
+            {
+                if (usuarioModel.Contraseña == contraseña)
+                {
+                    isValid = true;
+                    // Actualización transparente inmediata a BCrypt en la base de datos
+                    usuarioModel.Contraseña = _passwordHasher.HashPassword(contraseña);
+                    await _db.SaveChangesAsync();
+                }
+            }
+            else
+            {
+                // 2. Verificación estándar con BCrypt
+                isValid = _passwordHasher.VerifyPassword(contraseña, usuarioModel.Contraseña);
+
+                // Auto-upgrade si el factor de trabajo requiere actualización
+                if (isValid && _passwordHasher.NeedsRehash(usuarioModel.Contraseña))
+                {
+                    usuarioModel.Contraseña = _passwordHasher.HashPassword(contraseña);
+                    await _db.SaveChangesAsync();
+                }
+            }
+
+            if (!isValid)
+                return null!;
 
             // Mapear a la entidad de dominio y devolver el usuario
             var usuario = new Usuario(
