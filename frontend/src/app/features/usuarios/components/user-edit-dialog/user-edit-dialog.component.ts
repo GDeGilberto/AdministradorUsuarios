@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -10,6 +10,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { finalize } from 'rxjs';
 import { UsuarioTableData } from '../../../../core/models/usuario.model';
 import { UsuarioService } from '../../../../core/services/usuario.service';
 
@@ -56,12 +57,14 @@ function passwordMatchValidator(control: AbstractControl): {[key: string]: any} 
 export class UserEditDialogComponent {
   editForm: FormGroup;
   isLoading = false;
+  errorMessage: string | null = null;
 
   constructor(
     private fb: FormBuilder,
     private usuarioService: UsuarioService,
     private snackBar: MatSnackBar,
     private dialogRef: MatDialogRef<UserEditDialogComponent>,
+    private cdr: ChangeDetectorRef,
     @Inject(MAT_DIALOG_DATA) public data: UsuarioTableData
   ) {
     this.editForm = this.fb.group({
@@ -76,6 +79,7 @@ export class UserEditDialogComponent {
   onSubmit(): void {
     if (this.editForm.valid) {
       this.isLoading = true;
+      this.errorMessage = null;
       const formValue = this.editForm.value;
       
       const updateData: any = {
@@ -89,21 +93,27 @@ export class UserEditDialogComponent {
         updateData.confirmarContraseña = formValue.confirmarContraseña;
       }
 
-      this.usuarioService.updateUsuario(this.data.id, updateData).subscribe({
-        next: () => {
+      this.usuarioService.updateUsuario(this.data.id, updateData).pipe(
+        finalize(() => {
           this.isLoading = false;
+          this.cdr.detectChanges();
+        })
+      ).subscribe({
+        next: () => {
           this.snackBar.open('Usuario actualizado exitosamente', 'Cerrar', {
             duration: 3000,
             panelClass: ['success-snackbar']
           });
           this.dialogRef.close(true);
         },
-        error: (error) => {
-          this.isLoading = false;
-          this.snackBar.open('Error al actualizar usuario: ' + error.message, 'Cerrar', {
+        error: (error: any) => {
+          const msg = error?.message || (typeof error === 'string' ? error : 'Error al actualizar usuario');
+          this.errorMessage = msg;
+          this.snackBar.open(msg, 'Cerrar', {
             duration: 5000,
             panelClass: ['error-snackbar']
           });
+          this.cdr.detectChanges();
         }
       });
     }
