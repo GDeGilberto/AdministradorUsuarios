@@ -9,6 +9,12 @@
   <form [formGroup]="createForm" (ngSubmit)="onSubmit()">
     <div class="modal-body p-3 p-sm-4">
       <div class="container-fluid px-0">
+        <div *ngIf="errorMessage" class="alert alert-danger d-flex align-items-center alert-dismissible fade show mb-3" role="alert">
+          <mat-icon class="me-2">error_outline</mat-icon>
+          <div class="flex-grow-1">{{ errorMessage }}</div>
+          <button type="button" class="btn-close" (click)="errorMessage = null" aria-label="Close"></button>
+        </div>
+
         <div class="row g-2 g-md-3">
           <div class="col-12 col-md-6">
             <mat-form-field appearance="outline" class="w-100">
@@ -70,7 +76,6 @@
                 <mat-option [value]="0">Masculino</mat-option>
                 <mat-option [value]="1">Femenino</mat-option>
               </mat-select>
-              <mat-icon matSuffix>wc</mat-icon>
             </mat-form-field>
           </div>
         </div>
