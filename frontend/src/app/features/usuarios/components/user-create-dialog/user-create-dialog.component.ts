@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -10,6 +10,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { finalize } from 'rxjs';
 import { UsuarioService } from '../../../../core/services/usuario.service';
 
 function passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
@@ -46,9 +47,11 @@ export class UserCreateDialogComponent {
   private usuarioService = inject(UsuarioService);
   private snackBar = inject(MatSnackBar);
   private dialogRef = inject(MatDialogRef<UserCreateDialogComponent>);
+  private cdr = inject(ChangeDetectorRef);
 
   createForm: FormGroup;
   isLoading = false;
+  errorMessage: string | null = null;
 
   constructor() {
     this.createForm = this.fb.group({
@@ -63,6 +66,7 @@ export class UserCreateDialogComponent {
   onSubmit(): void {
     if (this.createForm.valid) {
       this.isLoading = true;
+      this.errorMessage = null;
       const formValue = this.createForm.value;
       const createData = {
         email: formValue.email.trim(),
@@ -72,21 +76,27 @@ export class UserCreateDialogComponent {
         sexo: parseInt(formValue.sexo)
       };
 
-      this.usuarioService.createUsuario(createData).subscribe({
-        next: () => {
+      this.usuarioService.createUsuario(createData).pipe(
+        finalize(() => {
           this.isLoading = false;
+          this.cdr.detectChanges();
+        })
+      ).subscribe({
+        next: () => {
           this.snackBar.open('Usuario creado exitosamente', 'Cerrar', {
             duration: 3000,
             panelClass: ['success-snackbar']
           });
           this.dialogRef.close(true);
         },
-        error: (error) => {
-          this.isLoading = false;
-          this.snackBar.open(error.message || 'Error al crear usuario', 'Cerrar', {
+        error: (error: any) => {
+          const msg = error?.message || (typeof error === 'string' ? error : 'Error al crear usuario');
+          this.errorMessage = msg;
+          this.snackBar.open(msg, 'Cerrar', {
             duration: 5000,
             panelClass: ['error-snackbar']
           });
+          this.cdr.detectChanges();
         }
       });
     }
