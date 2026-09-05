@@ -1,3 +1,4 @@
+using API.Middleware;
 using Application.DTOs;
 using Application.Interfaces;
 using Application.Mappers;
@@ -191,6 +192,8 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Configure the HTTP request pipeline.
+app.UseGlobalExceptionMiddleware();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
