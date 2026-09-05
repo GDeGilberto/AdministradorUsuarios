@@ -7,7 +7,7 @@ COPY API/*.csproj ./API/
 COPY Application/*.csproj ./Application/
 COPY Domain/*.csproj ./Domain/
 COPY Infrastructure/*.csproj ./Infrastructure/
-RUN dotnet restore
+RUN dotnet restore API/API.csproj
 
 # Copia todo el código y compila la capa ejecutable (API)
 COPY . .

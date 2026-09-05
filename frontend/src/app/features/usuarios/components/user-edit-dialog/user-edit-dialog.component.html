@@ -1,0 +1,109 @@
+<div class="modal-content shadow-lg border-0">
+  <div class="modal-header bg-primary text-white">
+    <h4 class="modal-title d-flex align-items-center mb-0">
+      <mat-icon class="me-2 d-none d-sm-block">edit</mat-icon>
+      Editar Usuario
+    </h4>
+  </div>
+  
+  <form [formGroup]="editForm" (ngSubmit)="onSubmit()">
+    <div class="modal-body p-3 p-sm-4">
+      <div class="container-fluid px-0">
+        <div *ngIf="errorMessage" class="alert alert-danger d-flex align-items-center alert-dismissible fade show mb-3" role="alert">
+          <mat-icon class="me-2">error_outline</mat-icon>
+          <div class="flex-grow-1">{{ errorMessage }}</div>
+          <button type="button" class="btn-close" (click)="errorMessage = null" aria-label="Close"></button>
+        </div>
+
+        <div class="row g-2 g-md-3">
+          <div class="col-12 col-md-6">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Nombre de Usuario</mat-label>
+              <input matInput formControlName="nombreUsuario" placeholder="Ingrese el nombre de usuario">
+              <mat-icon matSuffix>person</mat-icon>
+              <mat-error *ngIf="editForm.get('nombreUsuario')?.hasError('required')">
+                El nombre es requerido
+              </mat-error>
+              <mat-error *ngIf="editForm.get('nombreUsuario')?.hasError('minlength')">
+                Mín. 3 caracteres
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Email</mat-label>
+              <input matInput type="email" formControlName="email" placeholder="usuario@ejemplo.com">
+              <mat-icon matSuffix>email</mat-icon>
+              <mat-error *ngIf="editForm.get('email')?.hasError('required')">
+                Email requerido
+              </mat-error>
+              <mat-error *ngIf="editForm.get('email')?.hasError('email')">
+                Email inválido
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="col-md-6">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Contraseña (opcional)</mat-label>
+              <input matInput type="password" formControlName="contraseña" placeholder="Dejar vacío para no cambiar">
+              <mat-icon matSuffix>lock</mat-icon>
+              <mat-error *ngIf="editForm.hasError('passwordTooShort')">
+                Mínimo 8 caracteres
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="col-md-6">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Confirmar Contraseña</mat-label>
+              <input matInput type="password" formControlName="confirmarContraseña" placeholder="Confirme la nueva contraseña">
+              <mat-icon matSuffix>lock_outline</mat-icon>
+              <mat-error *ngIf="editForm.hasError('passwordMismatch')">
+                Las contraseñas no coinciden
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="col-12">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Sexo</mat-label>
+              <mat-select formControlName="sexo">
+                <mat-option [value]="UsuarioSexo.Masculino">Masculino</mat-option>
+                <mat-option [value]="UsuarioSexo.Femenino">Femenino</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div *ngIf="isLoading" class="loading-overlay d-flex justify-content-center align-items-center">
+          <div class="text-center">
+            <mat-spinner diameter="40"></mat-spinner>
+            <p class="mt-2 mb-0 text-muted">Actualizando usuario...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer bg-light border-top">
+      <div class="d-flex flex-column flex-sm-row justify-content-sm-end gap-2 w-100">
+        <button 
+          type="submit" 
+          class="btn btn-primary order-sm-2"
+          [disabled]="editForm.invalid || isLoading">
+          <mat-icon class="me-1 d-none d-sm-inline">{{ isLoading ? 'hourglass_empty' : 'save' }}</mat-icon>
+          {{ isLoading ? 'Guardando...' : 'Guardar Cambios' }}
+        </button>
+        <button 
+          type="button" 
+          class="btn btn-outline-secondary order-sm-1" 
+          (click)="onCancel()" 
+          [disabled]="isLoading">
+          <mat-icon class="me-1 d-none d-sm-inline">close</mat-icon>
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </form>
+</div>

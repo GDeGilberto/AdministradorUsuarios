@@ -1,0 +1,161 @@
+<main class="login-main" role="main">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-6 col-lg-4">
+        
+        <!-- Language Switcher Bar -->
+        <div class="d-flex justify-content-end mb-2">
+          <div class="btn-group btn-group-sm" role="group" aria-label="Language selector">
+            <button 
+              type="button" 
+              class="btn btn-light"
+              [class.active]="translationService.currentLang === 'es'"
+              (click)="changeLanguage('es')">
+              🇲🇽 ES
+            </button>
+            <button 
+              type="button" 
+              class="btn btn-light"
+              [class.active]="translationService.currentLang === 'en'"
+              (click)="changeLanguage('en')">
+              🇺🇸 EN
+            </button>
+          </div>
+        </div>
+
+        <article class="login-card card shadow-lg border-0" role="region" aria-labelledby="login-title">
+          <div class="card-body p-5">
+            <!-- Header Section -->
+            <header class="login-header text-center mb-4">
+              <i class="fas fa-user-circle fa-3x text-primary mb-3" aria-hidden="true"></i>
+              <h1 id="login-title" class="card-title text-dark h2">{{ 'LOGIN.TITLE' | translate }}</h1>
+              <p class="text-muted">{{ 'LOGIN.SUBTITLE' | translate }}</p>
+            </header>
+
+            <!-- Login Form -->
+            <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+
+              <!-- Email Field -->
+              <div class="mb-3">
+                <label for="email" class="form-label">
+                  <i class="fas fa-envelope me-2" aria-hidden="true"></i>
+                  <span>{{ 'LOGIN.EMAIL' | translate }}</span>
+                </label>
+                <input 
+                  type="email" 
+                  id="email"
+                  formControlName="email"
+                  class="form-control form-control-lg"
+                  [class.is-invalid]="loginForm.get('email')?.touched && loginForm.get('email')?.errors"
+                  placeholder="usuario@ejemplo.com"
+                  autocomplete="email"
+                />
+                <div 
+                  *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.errors" 
+                  class="invalid-feedback"
+                  role="alert">
+                  <div *ngIf="loginForm.get('email')?.errors?.['required']">
+                    {{ 'LOGIN.EMAIL_REQUIRED' | translate }}
+                  </div>
+                  <div *ngIf="loginForm.get('email')?.errors?.['email']">
+                    {{ 'LOGIN.EMAIL_INVALID' | translate }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Password Field -->
+              <div class="mb-4">
+                <label for="contraseña" class="form-label">
+                  <i class="fas fa-lock me-2" aria-hidden="true"></i>
+                  <span>{{ 'LOGIN.PASSWORD' | translate }}</span>
+                </label>
+                <div class="input-group">
+                  <input 
+                    [type]="showPassword ? 'text' : 'password'" 
+                    id="contraseña"
+                    formControlName="contraseña"
+                    class="form-control form-control-lg"
+                    [class.is-invalid]="loginForm.get('contraseña')?.touched && loginForm.get('contraseña')?.errors"
+                    placeholder="••••••••"
+                    autocomplete="current-password"
+                  />
+                  <button 
+                    type="button" 
+                    class="btn btn-outline-secondary"
+                    (click)="togglePassword()">
+                    <i class="fas" 
+                       [class.fa-eye]="!showPassword" 
+                       [class.fa-eye-slash]="showPassword"
+                       aria-hidden="true"></i>
+                  </button>
+                </div>
+                <div 
+                  *ngIf="loginForm.get('contraseña')?.touched && loginForm.get('contraseña')?.errors" 
+                  class="invalid-feedback d-block"
+                  role="alert">
+                  <div *ngIf="loginForm.get('contraseña')?.errors?.['required']">
+                    {{ 'LOGIN.PASSWORD_REQUIRED' | translate }}
+                  </div>
+                  <div *ngIf="loginForm.get('contraseña')?.errors?.['minlength']">
+                    {{ 'LOGIN.PASSWORD_MIN' | translate }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Alert Messages -->
+              <section class="alerts-section" aria-live="polite">
+                <!-- Error Message -->
+                <div 
+                  *ngIf="errorMessage" 
+                  class="alert alert-danger d-flex align-items-center" 
+                  role="alert">
+                  <i class="fas fa-exclamation-triangle me-2" aria-hidden="true"></i>
+                  <div>{{ errorMessage }}</div>
+                </div>
+
+                <!-- Success Message -->
+                <div 
+                  *ngIf="successMessage" 
+                  class="alert alert-success d-flex align-items-center" 
+                  role="alert">
+                  <i class="fas fa-check-circle me-2" aria-hidden="true"></i>
+                  <div>{{ successMessage }}</div>
+                </div>
+              </section>
+
+              <!-- Submit Button -->
+              <div class="d-grid">
+                <button 
+                  type="submit"
+                  [disabled]="loading || loginForm.invalid"
+                  class="btn btn-primary btn-lg">
+                  <span 
+                    *ngIf="loading" 
+                    class="spinner-border spinner-border-sm me-2" 
+                    role="status"
+                    aria-hidden="true"></span>
+                  <i 
+                    *ngIf="!loading" 
+                    class="fas fa-sign-in-alt me-2" 
+                    aria-hidden="true"></i>
+                  <span>{{ loading ? ('COMMON.LOADING' | translate) : ('LOGIN.SUBMIT' | translate) }}</span>
+                </button>
+              </div>
+
+              <!-- Register Link -->
+              <div class="text-center mt-3">
+                <p class="mb-0">
+                  {{ 'LOGIN.NO_ACCOUNT' | translate }} 
+                  <a routerLink="/register" class="text-primary text-decoration-none fw-bold">
+                    {{ 'LOGIN.REGISTER_LINK' | translate }}
+                  </a>
+                </p>
+              </div>
+            </form>
+
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+</main>

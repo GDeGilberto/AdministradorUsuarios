@@ -1,3 +1,4 @@
+using API.Middleware;
 using Application.DTOs;
 using Application.Interfaces;
 using Application.Mappers;
@@ -137,6 +138,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<IRepository<Usuario>, UsuarioRepository>();
 
 // Register Services
+builder.Services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 // Register Mappers & Presenters
@@ -190,6 +192,8 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Configure the HTTP request pipeline.
+app.UseGlobalExceptionMiddleware();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

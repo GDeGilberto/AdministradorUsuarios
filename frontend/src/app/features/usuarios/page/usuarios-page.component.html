@@ -1,0 +1,111 @@
+<main class="dashboard-container">
+  <!-- Header con navegación usando Bootstrap -->
+  <header>
+    <nav class="navbar navbar-expand-lg bg-white bg-opacity-95 shadow-sm">
+      <div class="container-fluid">
+        <div class="d-flex align-items-center">
+          <mat-icon class="text-primary me-2">group</mat-icon>
+          <h1 class="fs-5 mb-0 fw-semibold">{{ 'DASHBOARD.TITLE' | translate }}</h1>
+        </div>
+        
+        <div class="ms-auto d-flex align-items-center gap-2">
+          <!-- Language Selector -->
+          <div class="btn-group btn-group-sm" role="group" aria-label="Language Selector">
+            <button 
+              type="button" 
+              class="btn btn-outline-secondary"
+              [class.active]="translationService.currentLang === 'es'"
+              (click)="changeLanguage('es')">
+              🇲🇽 ES
+            </button>
+            <button 
+              type="button" 
+              class="btn btn-outline-secondary"
+              [class.active]="translationService.currentLang === 'en'"
+              (click)="changeLanguage('en')">
+              🇺🇸 EN
+            </button>
+          </div>
+
+          <button mat-button [matMenuTriggerFor]="userMenu" 
+                class="btn btn-outline-primary rounded-pill d-flex align-items-center">
+            <i class="fas fa-user-circle me-1"></i>
+            <span *ngIf="currentUser$ | async as user" class="ms-1 d-none d-sm-inline">
+              {{ user.nombreUsuario || user.email }}
+            </span>
+          </button>
+          
+          <mat-menu #userMenu="matMenu">
+            <button mat-menu-item (click)="logout()">
+              <i class="fas fa-sign-out-alt me-2"></i>
+              <span>{{ 'NAV.LOGOUT' | translate }}</span>
+            </button>
+          </mat-menu>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Contenido principal -->
+  <div class="container-fluid py-4">
+    <!-- Estadísticas resumidas -->
+    <section class="mb-4">
+      <div class="row">
+        <div class="col-12">
+          <div class="card shadow border-0">
+            <div class="card-body p-0">
+              <div class="row g-0">
+                <div class="col-12 col-md-4">
+                  <div class="d-flex align-items-center p-3 border-bottom border-md-end border-md-bottom-0">
+                    <div class="rounded-circle p-3 bg-primary bg-gradient text-white me-3 d-flex align-items-center justify-content-center">
+                      <mat-icon>group</mat-icon>
+                    </div>
+                    <div>
+                      <h2 class="h1 fw-bold mb-0 text-dark">{{ getTotalUsuarios() }}</h2>
+                      <p class="text-muted text-uppercase small mb-0 fw-medium">{{ 'DASHBOARD.STAT_TOTAL' | translate }}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="col-12 col-md-4">
+                  <div class="d-flex align-items-center p-3 border-bottom border-md-end border-md-bottom-0">
+                    <div class="rounded-circle p-3 bg-success bg-gradient text-white me-3 d-flex align-items-center justify-content-center">
+                      <mat-icon>check_circle</mat-icon>
+                    </div>
+                    <div>
+                      <h2 class="h1 fw-bold mb-0 text-dark">{{ getUsuariosActivos() }}</h2>
+                      <p class="text-muted text-uppercase small mb-0 fw-medium">{{ 'DASHBOARD.STAT_ACTIVE' | translate }}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="col-12 col-md-4">
+                  <div class="d-flex align-items-center p-3">
+                    <div class="rounded-circle p-3 bg-danger bg-gradient text-white me-3 d-flex align-items-center justify-content-center">
+                      <mat-icon>cancel</mat-icon>
+                    </div>
+                    <div>
+                      <h2 class="h1 fw-bold mb-0 text-dark">{{ getUsuariosInactivos() }}</h2>
+                      <p class="text-muted text-uppercase small mb-0 fw-medium">{{ 'DASHBOARD.STAT_INACTIVE' | translate }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Componente Atómico UserList -->
+    <section class="mb-4">
+      <app-user-list
+        [usuarios]="usuarios"
+        [loading]="loading"
+        (editUser)="openEditDialog($event)"
+        (toggleStatus)="handleToggleStatus($event)"
+        (openCreateUser)="openCreateDialog()">
+      </app-user-list>
+    </section>
+  </div>
+</main>

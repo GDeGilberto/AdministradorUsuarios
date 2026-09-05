@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using Domain.Enum;
 
 namespace Application.DTOs
@@ -15,6 +15,8 @@ namespace Application.DTOs
 
         [Required]
         [MinLength(10)]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{10,}$", 
+            ErrorMessage = "La contraseña debe contener al menos una mayúscula, una minúscula, un número y un símbolo especial.")]
         public string Contraseña { get; set; }
 
         [Required]
