@@ -11,7 +11,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { finalize } from 'rxjs';
-import { UsuarioTableData } from '../../../../core/models/usuario.model';
+import { UsuarioTableData, UsuarioSexo } from '../../../../core/models/usuario.model';
 import { UsuarioService } from '../../../../core/services/usuario.service';
 
 function passwordMatchValidator(control: AbstractControl): {[key: string]: any} | null {
@@ -55,6 +55,7 @@ function passwordMatchValidator(control: AbstractControl): {[key: string]: any} 
   styleUrls: ['./user-edit-dialog.component.css']
 })
 export class UserEditDialogComponent {
+  UsuarioSexo = UsuarioSexo;
   editForm: FormGroup;
   isLoading = false;
   errorMessage: string | null = null;
@@ -67,12 +68,13 @@ export class UserEditDialogComponent {
     private cdr: ChangeDetectorRef,
     @Inject(MAT_DIALOG_DATA) public data: UsuarioTableData
   ) {
+    const initialSexo = data.sexo !== undefined && data.sexo !== null ? Number(data.sexo) : UsuarioSexo.Masculino;
     this.editForm = this.fb.group({
       nombreUsuario: [data.nombreUsuario, [Validators.required, Validators.minLength(3)]],
       email: [data.email, [Validators.required, Validators.email]],
       contraseña: [''],
       confirmarContraseña: [''],
-      sexo: [data.sexo !== undefined ? data.sexo : null, [Validators.required]]
+      sexo: [initialSexo, [Validators.required]]
     }, { validators: passwordMatchValidator });
   }
 
@@ -83,9 +85,9 @@ export class UserEditDialogComponent {
       const formValue = this.editForm.value;
       
       const updateData: any = {
-        email: formValue.email,
-        nombreUsuario: formValue.nombreUsuario,
-        sexo: formValue.sexo
+        email: formValue.email.trim(),
+        nombreUsuario: formValue.nombreUsuario.trim(),
+        sexo: Number(formValue.sexo)
       };
 
       if (formValue.contraseña && formValue.contraseña.trim()) {
