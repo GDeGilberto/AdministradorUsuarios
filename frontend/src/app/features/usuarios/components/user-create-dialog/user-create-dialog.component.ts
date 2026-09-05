@@ -12,6 +12,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { finalize } from 'rxjs';
 import { UsuarioService } from '../../../../core/services/usuario.service';
+import { UsuarioSexo } from '../../../../core/models/usuario.model';
 
 function passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
   const password = control.get('contraseña');
@@ -49,6 +50,7 @@ export class UserCreateDialogComponent {
   private dialogRef = inject(MatDialogRef<UserCreateDialogComponent>);
   private cdr = inject(ChangeDetectorRef);
 
+  UsuarioSexo = UsuarioSexo;
   createForm: FormGroup;
   isLoading = false;
   errorMessage: string | null = null;
@@ -59,7 +61,7 @@ export class UserCreateDialogComponent {
       email: ['', [Validators.required, Validators.email]],
       contraseña: ['', [Validators.required, Validators.minLength(10)]],
       confirmarContraseña: ['', [Validators.required]],
-      sexo: [0, [Validators.required]]
+      sexo: [UsuarioSexo.Masculino, [Validators.required]]
     }, { validators: passwordMatchValidator });
   }
 
@@ -73,7 +75,7 @@ export class UserCreateDialogComponent {
         nombreUsuario: formValue.nombreUsuario.trim(),
         contraseña: formValue.contraseña,
         confirmarContraseña: formValue.confirmarContraseña,
-        sexo: parseInt(formValue.sexo)
+        sexo: Number(formValue.sexo)
       };
 
       this.usuarioService.createUsuario(createData).pipe(
