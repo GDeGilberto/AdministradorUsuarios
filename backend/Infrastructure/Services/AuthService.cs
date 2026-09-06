@@ -1,9 +1,11 @@
-﻿using Application.Interfaces;
+using Application.Interfaces;
 using Domain.Entities;
 using Domain.Enum;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -16,25 +18,31 @@ namespace Infrastructure.Services
         private readonly ApplicationDbContext _db;
         private readonly IConfiguration _configuration;
         private readonly IPasswordHasher _passwordHasher;
+        private readonly ILogger<AuthService> _logger;
 
         public AuthService(
             ApplicationDbContext db, 
             IConfiguration configuration,
-            IPasswordHasher passwordHasher)
+            IPasswordHasher passwordHasher,
+            ILogger<AuthService>? logger = null)
         {
             _db = db;
             _configuration = configuration;
             _passwordHasher = passwordHasher;
+            _logger = logger ?? NullLogger<AuthService>.Instance;
         }
 
         public async Task<Usuario> ValidateUserAsync(string email, string contraseña)
         {
+            _logger.LogInformation("Iniciando validación de credenciales para el usuario con email: {Email}", email);
+
             // Buscar el usuario por email
             var usuarioModel = await _db.Usuarios
                 .FirstOrDefaultAsync(u => u.Email == email && u.Estatus == true);
 
             if (usuarioModel == null)
             {
+                _logger.LogWarning("Intento de autenticación fallido: no existe o está inactivo el usuario con email: {Email}", email);
                 // Mitigación de Timing Attack: ejecuta cómputo de BCrypt para igualar tiempos de respuesta
                 _passwordHasher.PerformDummyVerification(contraseña);
                 return null!;
@@ -48,6 +56,7 @@ namespace Infrastructure.Services
                 if (usuarioModel.Contraseña == contraseña)
                 {
                     isValid = true;
+                    _logger.LogInformation("Actualizando contraseña heredada a BCrypt (Transparent Rehash) para el usuario con email: {Email}", email);
                     // Actualización transparente inmediata a BCrypt en la base de datos
                     usuarioModel.Contraseña = _passwordHasher.HashPassword(contraseña);
                     await _db.SaveChangesAsync();
@@ -61,13 +70,19 @@ namespace Infrastructure.Services
                 // Auto-upgrade si el factor de trabajo requiere actualización
                 if (isValid && _passwordHasher.NeedsRehash(usuarioModel.Contraseña))
                 {
+                    _logger.LogInformation("Actualizando factor de trabajo de BCrypt para el usuario con email: {Email}", email);
                     usuarioModel.Contraseña = _passwordHasher.HashPassword(contraseña);
                     await _db.SaveChangesAsync();
                 }
             }
 
             if (!isValid)
+            {
+                _logger.LogWarning("Intento de autenticación fallido: contraseña incorrecta para el usuario con email: {Email}", email);
                 return null!;
+            }
+
+            _logger.LogInformation("Usuario autenticado exitosamente: {Email} (ID: {Id})", usuarioModel.Email, usuarioModel.Id);
 
             // Mapear a la entidad de dominio y devolver el usuario
             var usuario = new Usuario(
@@ -111,6 +126,7 @@ namespace Infrastructure.Services
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
+            _logger.LogInformation("Token JWT generado exitosamente para el usuario ID: {Id}, Email: {Email}", usuario.Id, usuario.Email);
             return tokenHandler.WriteToken(token);
         }
     }

@@ -80,6 +80,12 @@ TestResults/
 usersecrets/
 appsettings.Development.json
 
+# Logs and crash dumps
+logs/
+**/logs/
+*.log
+*.stackdump
+
 # ==============================================================================
 # Miscellaneous
 # ==============================================================================
