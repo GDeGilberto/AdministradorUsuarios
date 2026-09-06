@@ -27,6 +27,8 @@ services:
       - ConnectionStrings__DefaultConnection=Host=${DB_SERVER};Port=${DB_INTERNAL_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD};
       # Clave secreta del JWT inyectada dinámicamente
       - JwtSettings__SecretKey=${JWT_SECRET_KEY}
+    volumes:
+      - ./backend/logs:/app/logs
     depends_on:
       - database
 

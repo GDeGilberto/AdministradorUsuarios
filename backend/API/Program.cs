@@ -12,9 +12,21 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Serilog;
 using System.Text;
 
-var builder = WebApplication.CreateBuilder(args);
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
+
+try
+{
+    var builder = WebApplication.CreateBuilder(args);
+
+    builder.Host.UseSerilog((context, services, configuration) => configuration
+        .ReadFrom.Configuration(context.Configuration)
+        .ReadFrom.Services(services)
+        .Enrich.FromLogContext());
 
 // --- CARGAR ARCHIVO .ENV PARA DESARROLLO LOCAL ---
 var currentDir = Directory.GetCurrentDirectory();
@@ -193,6 +205,7 @@ using (var scope = app.Services.CreateScope())
 
 // Configure the HTTP request pipeline.
 app.UseGlobalExceptionMiddleware();
+app.UseSerilogRequestLogging();
 
 if (app.Environment.IsDevelopment())
 {
@@ -216,4 +229,15 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+    Log.Information("Iniciando API de AdministradorEmpleados...");
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "La aplicación terminó inesperadamente.");
+    throw;
+}
+finally
+{
+    Log.CloseAndFlush();
+}

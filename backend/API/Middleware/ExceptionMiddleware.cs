@@ -25,7 +25,8 @@ namespace API.Middleware
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Excepción no controlada capturada en middleware: {Message}", ex.Message);
+                _logger.LogError(ex, "Excepción no controlada [{TraceId}] al procesar {Method} {Path}: {Message}", 
+                    context.TraceIdentifier, context.Request.Method, context.Request.Path, ex.Message);
                 await HandleExceptionAsync(context, ex);
             }
         }
